@@ -1,0 +1,88 @@
+因为VC内部机制是将函数的传入参数都做一个副本，如果我们传入的用来获取malloc分配内存地址的副本变化了，
+而我们的参数并不会同步，除非使用函数返回值的方式才能传出去。
+
+#include <iostream>
+using namespace std;
+ 
+void pointer(int *p)
+{
+	int a = 11, c = 33;
+	printf("\n\nEnter function");
+	printf("\nthe p is point to  %p , p's addr is %X, *p is %d", p, &p, *p);
+	*p = a;
+	printf("\nthe p is point to  %p , p's addr is %X, *p is %d", p, &p, *p);
+	p = &c;
+	printf("\nthe p is point to  %p ,  p's addr is %X, *p is %d", p, &p, *p);
+ 
+	printf("\nfunction return\n");
+}
+ 
+int main()
+{
+	int b = 22;
+	int *p = &b;
+ 
+	printf("the b address %X\n", &b);
+	printf("the p is point to %p , p's addr is %X, *p is %d", p, &p, *p);
+	pointer(p);
+	printf("\nthe p is  point to %p , p's addr is %X, *p is %d\n", p, &p, *p);
+}
+运行结果：
+the b address 003DFC98
+the p is point to 003DFC98 , p's addr is 3DFC8C, *p is 22
+ 
+Enter function
+the p is point to  003DFC98 , p's addr is 3DFBB8, *p is 22
+the p is point to  003DFC98 , p's addr is 3DFBB8, *p is 11
+the p is point to  003DFB98 ,  p's addr is 3DFBB8, *p is 33
+function return
+ 
+the p is  point to 003DFC98 , p's addr is 3DFC8C, *p is 11
+
+
+你可以改变main函数中b的值，但是不能改变p的值。
+
+
+
+函数参数为指针的指针 （双重指针）
+
+    #include <iostream>
+    using namespace std;
+     
+    void GetMemory(char *p, int num)
+    {
+    	p = (char*)malloc(sizeof(char)*num);
+    }
+     
+    void main()
+    {
+    	char *s = NULL;
+    	GetMemory(s, 100);
+    	strcpy(s, "hello");
+    	printf(s);
+    }
+	s还是指向NULL
+	#include <iostream>
+	using namespace std;
+	 
+	void GetMemory(char **p, int num)
+	{
+		*p = (char*)malloc(sizeof(char)*num);
+	}
+	 
+	void main()
+	{
+		char *s = NULL;
+		GetMemory(&s, 100);
+		strcpy(s, "hello\n");
+		printf(s);
+	}
+	
+	
+	
+	
+
+总结：
+1、实参会拷贝形参，修改形参并不会改变实参
+2、function(int *p){};当传入值的指针，可以通过*p=5修改值
+2、function(int **p){};当传入值的二级指针，可以通过**p=5修改值，可以通过*p = new int修改指针的指向

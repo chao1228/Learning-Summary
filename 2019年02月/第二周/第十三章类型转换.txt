@@ -1,0 +1,25 @@
+• static_cast
+	用于在相关类型的指针之间进行转换,还可显式地执行标准数据类型的类型转换—这种转换原本将自动或隐式地进行。
+	static_cast 只验证指针类型是否相关,而不会执行任何运行阶段检查
+• dynamic_cast
+	动态类型转换在运行阶段(即应用程序运行时)执行类型转换。
+	可检查 dynamic_cast 操作的结果,以判断类型转换是否成功
+	这种在运行阶段识别对象类型的机制称为运行阶段类型识别
+• reinterpret_cast
+	它让程序员能够将一种对象类型转换为另一种,不管它们是否相关
+• const_cast
+	让程序员能够关闭对象的访问修饰符 const
+
+使用 dynamic_cast 时,别忘了对转换得到的指针进行检查,看其是否有效
+
+请牢记,创建继承层次结构时,应尽量将函数声明为虚函数。这样通过基类指针调用这些函数时,
+如果该指针指向的是派生类对象,将调用相应类的函数版本
+
+将 Derived*转换为 Base*被称为向上转换,无需使用任何显式类型转换运算符就能进行这种转换:
+Derived objDerived;
+Base* objBase = &objDerived; // ok!
+将 Base*转换为 Derived*被称为向下转换,如果不使用显式类型转换运算符,就无法进行这种转换:
+Derived objDerived;
+Base* objBase = &objDerived; // Upcast -> ok!
+Derived* objDer = objBase; // Error: Downcast needs
+explicit cast

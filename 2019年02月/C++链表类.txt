@@ -1,0 +1,350 @@
+插入删除
+在链表的末尾添加一个节点
+在链表中找到第一个含有某值的节点并删除该节点
+找出中间节点
+反向遍历链表
+找出倒数第k个节点
+判断两个链表是否相交，并返回相交点
+
+翻转链表
+判断链表是否有环路，获取连接点，计算环的长度
+二叉树和双向链表转化
+
+单项链表
+struct ListNode{
+	int data;
+	ListNode *next;
+}
+
+双向链表
+struct DListNode{
+	int data;
+	ListNode* left;
+	ListNode* right;
+}
+在链表的末尾添加一个节点
+void AddToTail(ListNode** pHead,int value){
+	if(pHead == nullptr){
+		return;
+	}
+	if(*pHead == nullptr){
+		return;
+	}
+	ListNode* p = *pHead;
+	ListNode* q = NULL;
+	while(p != NULL){
+		q = p;
+		p = p->data;
+	}
+	q->next = value;
+}
+在链表中找到第一个含有某值的节点并删除该节点
+void RemoveNode(ListNode** pHead,int value)
+{
+	ListNode* removeNode = NULL;
+	if(pHead == nullptr)
+	{
+		return;
+	}
+	if(*pHead == nullptr)
+	{
+		return;
+	}
+	if(*pHead->data == value)
+	{
+		removeNode = *pHead;
+		*pHead = *pHead->next;
+	}
+	else
+	{
+		ListNode* p = *pHead;
+		while(p->next != NULL)
+		{
+			if(p->next->data == value){
+				removeNode = p->next;
+				p->next = p-next->next;
+			}
+			p = p->next;
+		}
+	}
+	if(removeNode->next! = NULL)
+	{
+		delete removeNode;
+		removeNode = NULL;
+	}
+}
+找出中间节点
+ListNode* findMidNode(ListNode* pHead){
+	ListNode* fast= pHead;
+	ListNode* slow= pHead;
+	if(pHead == NULL)
+	{
+		return NULL;
+	}
+	while(fast->next != NULL && fast->next->next != NULL)
+	{
+		fast = fast->next->next;
+		slow = slow->next;
+	}
+	return slow;
+
+}
+反向遍历链表
+void printLinkListReversinglyByStack(ListNode* pHead)
+{
+	stack <ListNode*> nodeStack;
+	ListNode* pNode = pHead;
+	if(pHead == NULL)
+	{
+		return ;
+	}
+	while(pNode != NULL)
+	{
+		nodeStack.push(pNode->data);
+		pNode = pNode->next;
+	}
+	while(!nodeStack.empty())
+	{
+		pNode = nodeStack.top();
+		std::cout<<pNode<<std::endl
+		ListNode* pNode = nodeStack.pop();
+	}
+}
+
+
+找出倒数第k个节点
+ListNode* findKNode(ListNode* pHead,int k)
+{
+	ListNode* pAhead = pHead;
+	ListNode* pBehind = pHead;
+	ListNode* pBehind;
+	if(pHead == NULL )
+	{
+		return NULL;
+	}
+	for(int i=0;i<k-1;i++){
+		if(pAhead->next == NULL){
+			return NULL;
+		}
+		pAhead = pAhead->next;
+	}   
+	while(pAhead->next != NULL){
+		pBehind = pBehind->next;
+		pAhead = pAhead->next;
+	}
+	return pBehind;
+
+}
+
+判断两个链表是否相交，并返回相交点
+ListNode* findCrossNode(ListNode* firstHead,ListNode* secondHead)
+{
+	int distance;
+	if(firstHead == NULL || secondHead == NULL)
+	{
+		return NULL;
+	}
+	int distance = getLinkedListLength(firstHead)-getLinkedListLength(secondHead);
+	if(distance > 0){
+		for(int i=0;i<distance;i++)
+		{
+			firstHead = firstHead->next;
+		}
+	}
+	else
+	{
+		for(int i=0;i<distance;i++)
+		{
+			secondHead = secondHead->next;
+		}
+	}
+	while(firstHead->next != NULL && secondHead->next != NULL)
+	{
+		if(firstHead == secondHead)
+		{
+			return firstHead;
+		} 
+		else
+		{
+			return NULL;
+		}
+		firstHead = firstHead->next;
+		secondHead = secondHead->next;
+	}
+}
+翻转链表
+void reverseNodeList(ListNode** pHead)
+{
+	if(pHead == NULL || *pHead == NULL)
+	{
+		return;
+	}
+	ListNode* preNode = NULL;
+	ListNode* pNode = *pHead;
+	ListNode* nextNode = NULL;
+	ListNode* temp = NULL;
+	while(*pNode->next != NULL)
+	{
+		temp = pNode->next;
+		pNode->next = pre;
+		pre = pNode; 
+		pNode = temp;
+	}
+	*pHead = pNode;
+}
+
+ListNode* reverseNodeList(ListNode* pHead)
+{
+	if(pHead == NULL || pHead->next == NULL)
+	{
+		return pHead;
+	}
+	ListNode newNode=reverseNodeList(pHead->next);
+	*pHead->next->next = *pHead;
+	*pHead->next =NULL;
+	return newNode;
+}
+
+判断链表是否有环路，获取连接点，计算环的长度
+//判断有环
+public ListNode EntryNodeInLoop(ListNode* pHead)
+{
+	if(pHead == NULL)
+	{
+		return NULL;
+	}
+	HashSet<ListNode*> set;
+	while(pHead->next!=NULL)
+	{
+		if(!set.add(pHead))
+		{
+			return pHead；
+		}
+		pHead = pHead->next;
+	}
+}
+//计算循环
+public ListNode EntryNodeInLoop(ListNode* pHead)
+{
+	if(pHead == NULL)
+	{
+		return NULL;
+	}
+	int x=0;
+	int L=0;
+	ListNode* fast = pHead;
+	ListNode* slow = pHead;
+	while(fast->next!=NULL && fast->next->next!=NULL)
+	{
+		if(fast == slow)
+		{
+			break;
+		}
+		else
+		{
+			fast=fast->next->next;
+			slow=slow->next;
+			x++;
+		}
+	}
+	if(fast->next == NULL || fast->next->next == NULL)
+	{
+		return NULL;
+	}
+	fast = pHead;
+	while(fast!=slow)
+	{
+		fast=fast->next;
+		slow=slow->next;
+		L++;
+	}
+	int length =L+x;
+	return fast;
+}
+
+二叉树和双向链表转化
+struct BinTree
+{
+	int value;
+	BinTree* left;
+	BinTree *right;
+	BinTree(int v):val(v),left(NULL),right(NULL);
+}
+//搜索二叉树转链表
+BinTree* ConvertNode(BinTree* root)
+{
+	BinTree* pre = NULL;
+	BinTree* behand = NULL;
+	BinTree* current= root;
+	if(root == NULL) return NULL;
+	pre = traverse(root->left);
+	if(pre != NULL)
+	{
+		pre->right=current;
+	}
+	root->left = pre;
+	behand = traverse(root->right);
+	return root;
+}
+BinTree* Convert(BinTree* root)
+{
+	BinTree* convertedList=NULL;
+	convertedList = ConvertNode(root);
+	if(convertedList == NULL) return NULL;
+	while(convertedList->left!=NULL)
+	{
+		convertedList=convertedList->left;
+	}
+	return convertedList;
+}
+//数组转搜索二叉树
+BinTree* arrayToBinaryTree(vector<int> nums,int start ,int end)
+{
+	int middle = ((end-start)>>2)+start;
+	BinTree* root= new BinTree(nums[middle]);
+	root->left = arrayToBinaryTree(nums,start,middle-1);
+	root->right = arrayToBinaryTree(nums,middle+1,end);
+	return root;
+
+}
+BinTree* Convert(vector<int> nums)
+{
+	if(nums!=NUMM)
+	{
+		return NULL;
+	}
+	arrayToBinaryTree(nums,0,nums.size()-1)
+
+}
+链表转搜索二叉树
+BinTree* LinkToBinaryTree(ListNode* pHead)
+{
+	if(pHead == NULL) return NULL;
+	if(pHead->next == NULL) return new BinTree(pHead->value);
+	ListNode* slow = pHead;
+	ListNode* fast = pHead;
+	BinTree* pre = slow;
+	while(pHead->next!=NULL && pHead->next->next !=NULL)
+	{
+		pre = slow;
+		slow = slow->next;
+		fast= fast->next->next;
+	}
+	BinTree* cur = new BinTree(slow->next);
+	pre->next = NULL;//断开链表，因为每次递归链表传入的都是完整的链表
+	cur->left = LinkToBinaryTree(pHead);
+	cur->right = LinkToBinaryTree(slow->next);
+	return cur;
+}
+
+
+
+
+
+
+
+
+
+
+
+

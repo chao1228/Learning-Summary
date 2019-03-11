@@ -1,0 +1,99 @@
+
+快速排序
+void quickSort(int arr[],int left,int right)
+{
+	if(arr == NULL || left<0 || left>right)
+		return;
+	
+	int baseNum = arr[left];
+	int leftNum = left+1;
+	int rightNum = right;
+	int temp = 0;
+	while(leftNum < rightNum)
+	{
+		//顺序很重要，先找比基准数小的
+		while(arr[rightNum]>=baseNum && leftNum < rightNum)
+		{
+			rightNum --;
+		}
+		while(arr[leftNum]<=baseNum && leftNum < rightNum)
+		{
+			left ++;
+		}
+		if(leftNum < rightNum){
+			temp = arr[left];
+			arr[left] = arr[right];
+			arr[right] = temp;
+		}
+	}
+	arr[left] = arr[rightNum];
+	arr[right] = baseNum;
+	quick(arr,int left,int leftNum-1);
+	quick(arr,int leftNum+1,int right);
+}
+
+归并排序
+void mergeSort(int arr,int start,int end)
+{
+	if(arr == NULL || start<0 || start>end)
+		return;
+	if(end - start == 0)
+	{
+		return;
+	}
+	if(end -start == 1)
+	{
+		if(arr[end]<arr[start])
+		{
+			swap(arr[end],arr[start])
+		}
+	}
+	int middle = start +((end-start+1)>>2);
+	mergeSort(arr,start,middle-1);
+	mergeSort(arr,middle,end);
+	merge(arr,start,end);
+	for()
+
+}
+
+void merge(int arr[],int start,int middle,int end)
+{
+	int *temp = new int[end - start];
+	int k=0;
+	int i = start;
+	int j = end;
+	while(i<middle && j>=middle)
+	{
+		if(arr[i]<arr[j])
+		{
+			temp[k++]=arr[i++];
+		}
+		else
+		{
+			temp[k++]=arr[j++];
+		}
+	}
+	while(i<middle)
+		temp[k++]=arr[i++];
+	while(j<middle)
+		temp[k++]=arr[j++];
+		
+	for(int i=0;i< (end - start);i++)
+	{
+		arr[start+i]=temp[i];
+	}
+	delete temp;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+

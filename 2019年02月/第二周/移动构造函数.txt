@@ -1,0 +1,31 @@
+左值与右值
+
+每一个C++表达式，要么是左值（lvalue），要么是右值（rvalue）。左值是生存期超过此表达式的对象，所有分配了名称的变量（包括const类型的变量）都是左值；右值基本都是临时变量，只在该表达式有效，它主要包括以下一些情况：
+
+    数值型的常量表达式，如：1+2。
+    字面字符串（Literal），如：”hello”。
+    在表达式中临时构造的对象。
+    返回类型非引用的函数的返回值
+
+右值引用最大作用在于它可以对一些临时对象动态分配的资源进行处理，减少二次拷贝，显著提高效率，例如下面的场景：
+	string s = string("h") + "e" + "ll" + "o";
+根据前面的分析，我们知道：string(“h”)其实是构造一个std::string的右值对象，它在内部会动态分配一些内存空间，以容纳字符数组。
+在以前C++的STL中，string的operator+可能存在以下几种重载（下面是简化过的函数形式，其实在stl中string是basic_string的一种模板）：
+
+	[cpp] view plain copy
+	string operator+(const string& s1, const& string& s2);  
+	string operator+(const string& s1, const char * s2);  
+	string operator+(cons char * s1, const& string& s2);   
+
+很明显，因为string(“h”)是一个右值，只能适用上面的第二种重载函数，但是这样s1中的内容便不能被修改了，当它再加上一个字符串时，
+即使s1的剩余容量足够容纳下s2中的内容，也只能重新分配内存空间，然后将s1、s2中的内容拷贝进去，原来s1中分配的空间被废弃，
+随着右值对象的析构被回收。当我们能够区分右值引用与常量引用时，便可以新增一种重载来减少内存的分配次数，如：
+
+	[cpp] view plain copy
+	string operator+(string && s1, const string& s2);     // 右值字符串加上一个常量字符串  
+	string operator+(const string & s1, string&& s2);     // 常量字符串加上一个右值字符串  
+	string operator+(string && s1, const char* s2);       // 右值字符串加上一个常量字符串  
+	string operator+(const char* s1, string&& s2);        // 常量字符串加上一个右值字符串  
+	string operator+(string && s1, string&& s2);          // 右值字符串加上一个右值字符串 
+当s1是一个右值引用时，将s2添加到自身末尾；当s1的剩余容量能够容纳下s2时，可以减少一次内存分配，
+这还不是结束，因为它返回的对象又是一个右值对象，当它还要加下一个字符串时，又可能减少一次内存分配。

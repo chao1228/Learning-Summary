@@ -1,0 +1,75 @@
+懒汉、饿汗、懒汉加单锁、懒汉加双锁、静态内部类
+
+懒汉：
+public class Singleton{
+	private static Singleton instance = null;
+	private Singleton(){}
+	
+	public static Singleton getInstance(){
+		if(instance == null){
+			instance = new Singleton();
+		}
+		return instance;
+	}
+}
+
+懒汉加单锁：
+public class Singleton{
+	private static Singleton instance = null;
+	private Singleton(){}
+	
+	public static synchronized Singleton getInstance(){
+		if(instance == null){
+			instance = new Singleton();
+		}
+		return instance;
+	}
+}
+缺陷：每次通过getInstance方法得到singleton实例的时候都有一个试图去获取同步锁的过程。而众所周知，加锁是很耗时的。能避免则避免。
+
+
+懒汉加双锁：
+public class Singleton{
+	private static Singleton instance = null;
+	private Singleton(){}
+	
+	public static Singleton getInstance(){
+		if(instance == null){
+			synchronized(Singleton.class){
+				if(instance == null){
+					instance = new Singleton();
+				}
+			}
+		}
+		return instance;
+	}
+}
+缺点：用双重if判断，复杂，容易出错。
+
+
+饿汗：
+public class Singleton{
+	private static Singleton instance = new Singleton();
+	private Singleton(){}
+	
+	public static Singleton getInstance(){
+		return instance;
+	}
+}
+缺点：没有lazy loading的效果，从而降低内存的使用率。
+
+
+静态内部类:
+public class Singleton{
+	private Singleton(){}
+	
+	private static class SingletonHolder{
+		private static Singleton instance = new Singleton();
+	}
+	public static Singleton getInstance(){
+		return SingletonHolder.instance;
+	}
+}
+优点：达到了lazy loading的效果，即按需创建实例
+静态内部类和非静态内部类一样，都是在被调用时才会被加载
+

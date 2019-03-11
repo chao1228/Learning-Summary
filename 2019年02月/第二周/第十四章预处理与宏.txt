@@ -1,0 +1,82 @@
+预处理器编译指令都以#打头
+
+使用#define 定义常量
+更好的选择是使用关键字 const 和数据类型
+
+C++程序员通常在.H 文件(头文件)中声明类和函数,并在.CPP 文件中定义函数
+
+如果设计非常复杂,即第二个类需要第一个类,则在 class2.h 中也需要包含 class1.h!
+在预处理器看来,两个头文件彼此包含对方会导致递归问题
+为了避免这种问题,可结合使用宏以及预处理器编译指令#ifndef 和#endif。
+
+#ifndef 可读作 if-not-defined。这是一个条件处理命令,让预处理器仅在标识符未定义时才继续
+
+编写宏时使用了大量括号--预处理器支持的文本替换机制。
+
+assert( )让您能够单击 Retry 按钮返回应用程序,而调用栈将指出哪行代码没有通过断言测试。这让 assert( )成为一项方便的调试功能
+
+尽可能不要自己编写宏函数。
+尽可能使用 const 变量,而不是宏常量
+
+在宏函数的定义中,别忘了使用括号将每个变量括起。
+为了在头文件中避免多次包含,别忘了使用#ifndef、#define 和#endif。
+
+模板声明以关键字 template 打头
+template <typename T1, typename T2 = T1>
+bool TemplateFunction(const T1& param1, const T2& param2);
+
+模板函数
+template <typename objType>
+const objType& GetMax(const objType& value1, const objType& value2)
+{
+	if (value1 > value2)
+	return value1;
+	else
+	return value2;
+}
+int maxVal = GetMax <int> (num1, num2);
+实际上调用模板函数时并非一定要指定类型,因此下面的函数调用没有任何问题
+int maxVal = GetMax(num1, num2);
+
+
+模板类
+template <typename T>
+class HoldVarTypeT
+{
+	private:
+	T value;
+	public:
+	void SetValue (const T& newValue) { value = newValue; }
+	T& GetValue() {return value;}
+};
+该模板类的一种用法:
+HoldVarTypeT <int> holdInt; // template instantiation for int
+holdInt.SetValue(5);
+cout << "The value stored is: " << holdInt.GetValue() << endl;
+
+多个参数的模板及默认类型
+template <typename T1=int, typename T2=int>
+
+
+模板类的具体化
+
+在 C++中,模板中的省略号告诉编译器,默认类或模板函数可接受任意数量的模板参数,且这些参数可为任何类型。
+
+std::tuple 就是实现元组的模板类,
+您可使用任意数量的元素来实例化这个模板类
+
+static_assert 是 C++11 新增的一项功能,让您能够禁止不希望的模板实例化
+
+问:如果所需的功能使用宏函数和模板都能实现,在什么情况下应使用宏函数,而不是模板?
+答:在任何情况下都应使用模板,而不是宏函数
+
+问:对于特定模板类,每个静态成员有多少个版本?
+答:这完全取决于针对多少种类型实例化了该模板类。如果针对 int、string 和自定义类型 X 实例
+化了该模板类,则每个静态成员都有三个不同的版本—每种模板实例化一个。
+
+
+
+
+
+
+

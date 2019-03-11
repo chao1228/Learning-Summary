@@ -1,0 +1,76 @@
+g++ -o hello helloworld.cpp
+	该命令行让 g++编译 C++文件 Hello.cpp,并创建一个名为 hello 的可执行文件
+解释器和编译器的区别
+
+#include <>和""
+
+int main (int argc, char* argv[])
+	该程序可能允许用户执行时提供命令行参数
+
+cout(控制台输出,读作 see-out)
+
+cout 是在名称空间 std 中定义的一个流(因此这里使用了 std::cout)
+
+流插入运算符<<
+
+std::endl 用于换行
+
+每次需要将新实体插入流中时,都使用了流插入运算符<<
+
+您使用 std (读作 standard)名称空间来调用获得 ISO 标准委员会批准的函数、流和工具。
+
+在代码中添加 std 限定符很繁琐。为避免添加该限定符,可使用声明 using namespace
+或者用using std::cout;
+
+在 main( )前面定义了该函数,因此无需声明该函数
+
+提取运算符>>
+
+std::cin >> Variable1 >> Variable2;
+
+如果输入了我的完整姓名 Siddhartha Rao,cin 依然只会存储第一部分,即 Siddhartha。要存储输入的整行内容,应使用函数 getline()
+
+#include 的作用
+
+内存：随机存取存储器(RAM)
+
+无符号整型 unsigned short、unsigned int、unsigned long 和 unsigned long long
+
+int8_t和 unit8_t、int16_t、uint16_t、int32_t、uint32_t、int64_t 和 uint64_t
+
+列表初始化来禁止缩窄：short anotherNum{ largeNum };
+
+使用 auto 时必须对变量进行初始化
+
+使用 typedef 替换变量类型
+
+使用 const 将变量声明为常量
+常量表达式 constexpr 不会改变并在编译过程中就得到计算结果的表达式
+枚举常量enum
+编译器将枚举量(Voilet 等)转换为整数,每个枚举量都比前一个大 1
+
+#define 定义常量，文本替换,而不是智能替换
+
+动态数组std::vector
+vector<int> dynArray(3);
+
+如果要用 char 数组标识 C 风格字符串,应将数组声明为多长?
+答:这是 C 风格字符串最复杂的地方之一。数组的长度应比它可能包含的最长字符串长 1,以便
+在末尾包含空字符
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

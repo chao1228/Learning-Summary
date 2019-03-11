@@ -1,0 +1,196 @@
+第一：空类的大小
+	空类的sizeof为1
+	
+类的大小与它的构造函数、析构函数和其他成员函数无关，只已它的数据成员有关
+
+第二：一般非空类大小
+1. 空类
+class A
+{
+};
+ 
+void main()
+{
+    printf("sizeof(A): %d\n", sizeof(A));
+    getchar();
+}
+ 得到结果为：1。
+ 类的实例化就是给每个实例在内存中分配一块地址。空类被实例化时，会由编译器隐含的添加一个字节。所以空类的size为1。
+
+
+2.虚函数
+class A
+{
+    virtual void FuncA();<br>        virtual void FuncB(); 
+};
+ 得到结果：4
+当C++ 类中有虚函数的时候，会有一个指向虚函数表的指针（vptr），在32位系统分配指针大小为4字节。所以size为4
+
+3.静态数据成员
+class A
+{
+  int a;
+  static int b;
+  virtual void FuncA();
+};
+ 得到结果：8
+静态数据成员被编译器放在程序的一个global data members中，它是类的一个数据成员．但是它不影响类的大小，不管这个类实际产生了多少实例，还是派生了多少新的类，静态成员数据在类中永远只有一个实体存在。
+
+而类的非静态数据成员只有被实例化的时候，他们才存在．但是类的静态数据成员一旦被声明，无论类是否被实例化，它都已存在．可以这么说，类的静态数据成员是一种特殊的全局变量．
+所以该类的size为：int a型4字节加上虚函数表指针4字节，等于8字节。
+
+
+4.普通成员函数
+class A
+{
+          void FuncA();
+}
+ 结果：1
+类的大小与它的构造函数、析构函数和其他成员函数无关，只已它的数据成员有关。
+
+
+5.普通继承
+class A
+{
+    int a;
+};
+class B
+{
+  int b;
+};
+class C : public A, public B
+{
+  int c;
+};
+ 结果为：sizeof(C) =12.
+可见普通的继承，就是基类的大小，加上派生类自身成员的大小。
+
+
+6.虚拟继承
+
+class C : virtual public A, virtual public B
+{
+  int c;
+};
+ 结果：16.
+
+当存在虚拟继承时，派生类中会有一个指向虚基类表的指针。所以其大小应为普通继承的大小（12字节），再加上虚基类表的指针大小（4个字节），共16字节。
+
+
+
+
+
+第三：sizeof可能对某些属性进行填充使其与字边界对其，也可能不这么做，取决于编译器。
+#include <iostream>
+using namespace std;
+ 
+class A  
+{
+public:
+	int i; //int占用4个字节
+};
+ 
+class B
+{
+public:
+	char ch; //char占用1个字节
+};
+ 
+class C
+{
+public:
+	int i;
+	short j;//short占用2个字节
+};
+ 
+class D  //D共占用8个字节
+{
+public:
+	int i;  //int占用4个字节
+	short j;  //short和char共占用3个字节，由于这里最宽的            
+	char ch;  //基本类型是int的4个字节，再填充一个字节凑成4的倍数
+};
+ 
+class E  //E共占用12个字节
+{
+public:     
+	int i;
+	int ii;  //两个int共占用8个字节
+	short j;  //1个short + 2个char = 4个字节，刚好是最宽
+	char ch; //基本类型int的大小的整数倍，不需要再填充字节
+	char chr;
+};
+ 
+int main()
+{
+	cout << "sizeof(A) = " << sizeof(A) << endl;  //4
+	cout << "sizeof(B) = " << sizeof(B) << endl;  //1
+	cout << "sizeof(C) = " << sizeof(C) << endl;  //8
+	cout << "sizeof(D) = " << sizeof(D) << endl;  //8
+	cout << "sizeof(E) = " << sizeof(E) << endl;  //12
+	getchar();
+	return 0;
+}
+
+
+类中的数据成员顺序不同，类所占的内存大小可能不同；
+class C { 
+        char c; 
+        int int1; 
+        int int2; 
+        int i; 
+        long l; 
+        short s; 
+};
+
+
+这个类的大小是24字节。尽管char c只消耗1个字节，但将为它分配4个字节，
+剩下的3个字节将被浪费（留空）。这是因为下一个成员是int，
+它占用4个字节。如果我们不进入下一个（4）字节来存储这个整数成员，
+那么这个整数的内存访问/修改周期将是2个读周期。所以编译器会为我们做这个补位。
+
+
+
+关于空类：
+
+#include<iostream> 
+using namespace std; 
+  
+class Empty { }; 
+  
+int main() 
+{ 
+    Empty a, b; 
+  
+    if (&a == &b) 
+      cout << "a 和 b的地址相同 " << endl; 
+    else
+      cout << "a 和 b的地址不同 " << endl; 
+  
+   return 0; 
+} 
+
+输出结果：
+--------------------- 
+a 和 b的地址不同
+ 
+ 
+#include<iostream> 
+using namespace std; 
+  
+class Empty { }; 
+  
+class Derived: Empty { int a; }; 
+  
+int main() 
+{ 
+    cout << sizeof(Derived); 
+    return 0; 
+}
+--------------------- 
+输出：4
+为什么是4，而不是5？
+
+  原因是C++有一条规则表明空基类不需要用单独的字节表示。因此编译器可以在空基类的情况下自由优化
+
+

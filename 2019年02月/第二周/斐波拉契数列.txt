@@ -1,0 +1,31 @@
+斐波拉契数列递归：
+
+int fibonacci(int n)
+{
+	if(n == 1)
+		return 0;
+	if(n == 2)
+		return 1;
+	return fibonacci(n-1)+fibonacci(n-2);
+}
+斐波拉契数列循环：
+int fibonacci(int n)
+{
+	if(n == 1)
+		return 0;
+	if(n == 2)
+		return 1;
+	int i = 2;
+	int preNum=0;
+	int curNum = 1;
+	int result = 0;
+	while(i<n)
+	{
+		result = preNum + curNum;
+		preNum = curNum;
+		curNum = result;
+		i++;
+	}
+	return result;
+
+}
