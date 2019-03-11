@@ -1,0 +1,86 @@
+//动态规划
+//f(0)=0
+// f(1)=prices[0]
+// f(2)=max{prices[1], f(1)+f(1)}
+// f(3)=max{prices[2], f(1)+f(2)}
+// f(4)=max{prices[3], f(1)+f(3), f(2)+f(2)}
+// ...
+// f(n)=max{prices[n-1], f(1)+f(n-1), f(2)+f(n-2), ..., f(i)+f(n-i), ...}
+// 对于f(n)，为了保证f(i)+f(n-i)不重复，需要保证i<=n/2，这也是循环次数限制条件，在1～n/2范围内求解。
+
+int maxLength(int length)
+{
+	if(length < 2)
+		return 0;
+	if(length == 2)
+		return 1;
+	if(length == 3)
+		return 2;
+	
+	int *array=new int[length+1];
+	array[0]=0;
+	array[1]=1;
+	array[2]=2;
+	array[3]=3;
+	int max = 0;
+	for(int i = 4;i<=length;i++)
+	{	
+		max = 0;
+		for(int j=1;j<=i/2;j++)
+		{
+			if(max<array[j]*array[i-j])
+			{
+				max = array[j]*array[i-j];
+			}
+		}
+		array[i]=max;
+	}
+	delete[] array;
+	return max;
+}
+
+
+
+
+贪心算法：
+
+int maxLength(int length)
+{
+	if(length < 2)
+		return 0;
+	if(length == 2)
+		return 1;
+	if(length == 3)
+		return 2;
+	
+	int time = length/3;
+	if(length - time*3 == 1 )
+	{
+		--time;
+		return (int)Math.pow(3, timesOf3)*4;
+	}
+
+	return (int)Math.pow(3, timesOf3);
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

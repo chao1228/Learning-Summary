@@ -1,0 +1,49 @@
+//输入负数会造成死循环
+int NumberOf1(int num)
+{
+	int count = 0;
+	while(num)
+	{
+		if(num & 1)//与低位判断
+			count ++;
+		n = n>>1;
+	}
+	return count;
+}
+
+//常规解法
+int NumberOf1(int num)
+{
+	int count = 0;
+	int flag = 1;
+	while(num)
+	{
+		if(num & flag)
+			count ++;
+		flag = flag<<1;
+	}
+	return count;
+}
+//推荐解法
+int NumberOf1(int num)
+{
+	int count = 0;
+	while(num)
+	{
+		count ++;
+		num = num&(num-1);
+	}
+	return count;
+}
+
+用一条语句判断一个数是不是2的整数次方
+
+if((num & num-1) == 0)
+
+输入两个数m和n，计算需要改变m的二进制表示中的多少位才能得到n。
+
+int changeNum(int m,int n)
+{
+	int num = m^n;
+	return NumberOf1(num);
+}
