@@ -1,0 +1,41 @@
+
+// 题目：输入两棵二叉树A和B，判断B是不是A的子结构。
+bool hasSubTree(BinaryTreeNode* binaryTreeA,BinaryTreeNode* binaryTreeB)
+{
+	bool result = false;
+	if(binaryTreeA != nullptr && binaryTreeB != nullptr)
+	{
+		if(equal(binaryTreeA->value,binaryTreeB->value))
+			result = hasSubTreeCore(binaryTreeA,binaryTreeB);
+		if(!result)
+			result = hasSubTree(binaryTreeA->left,binaryTreeB);
+		if(!result)
+			result = hasSubTree(binaryTreeA->right,binaryTreeB);
+	}
+	return result;
+
+}
+
+bool equal(double firstNumber,douber secondNumber)
+{
+	if(firstNumber-secondNumber >= 0.0000001 && firstNumber-secondNumber <= 0.0000001)
+		return true;
+	return false;
+}
+
+bool hasSubTreeCore(BinaryTreeNode* binaryTreeA,BinaryTreeNode* binaryTreeB)
+{
+	if(binaryTreeB == nullptr)
+		return true;
+	if(binaryTreeA == nullptr)
+		return fasle;
+	
+	if(equal(binaryTreeA->value,binaryTreeB->value))
+	{
+		return  hasSubTreeCore(binaryTreeA->left,binaryTreeB->left)  &&
+				hasSubTreeCore(binaryTreeA->right,binaryTreeB->right)
+	}
+	else
+		return false;
+	
+}
