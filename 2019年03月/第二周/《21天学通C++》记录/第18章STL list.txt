@@ -1,0 +1,101 @@
+list 类的 STL 实现允许在开头、末尾和中间插入元素,且所需的时间固定
+要使用 std::list 类,需要包含头文件<list>:
+#include <list>
+
+要声明一个指向 list 中元素的迭代器,可以像下面这样做:
+std::list<int>::const_iterator elementInList;
+如果需要一个这样的迭代器,即可以使用它来修改值或调用非 const 函数,可将 const_iterator 替换为 iterator。
+
+各种实例化 std::list 的方式:指定元素数和初始值
+
+
+在 list 开头或末尾插入元素
+	linkInts.push_back (-1);
+	linkInts.push_front (2001);
+
+DisplayContents( )时,如果实参设置为 vector、list 或 deque,该函数也将正确运行。
+	template <typename T>
+	void DisplayContents (const T& container)
+	{
+
+		for(auto element = container.cbegin();element != container.cend();++ element )
+			cout << *element << ' ';
+		cout << endl;
+	}
+
+在 list 中间插入元素
+	linkInts1.insert (linkInts1.begin (), 2);
+
+	// Inserting 4 elements of the same value 0...
+	linkInts2.insert (linkInts2.begin (), 4, 0);
+
+	// Inserting elements from another list at the beginning...
+	linkInts3.insert (linkInts3.begin (),linkInts1.begin (), linkInts1.end ());
+
+删除 list 中的元素
+erase()有两种重载版本:一个接受一个迭代器参数并删除迭代器指向的元素;另一个接受两个迭代器参数并删除指定范围内的所有元素。
+	auto val2 = linkInts.insert(linkInts.begin(), 2);
+	linkInts.erase(val2);
+
+	linkInts.erase(linkInts.begin(), linkInts.end());
+
+	清空 std::list 等 STL 容器
+	linkInts.clear();
+
+使用 list::reverse( )反转元素的排列顺序
+	linkInts.reverse();
+对元素进行排序
+	linkInts.sort(); // sort in ascending order
+
+	接受一个二元谓词函数作为参数,让您能够指定排序标准:
+	bool SortPredicate_Descending (const int& lhs, const int& rhs)
+	{
+	// define criteria for list::sort: return true for desired order
+	return (lhs > rhs);
+	}
+	linkInts.sort (SortPredicate_Descending);
+	
+SortPredicate_Descending,它是一个二元谓词,帮助 list 的 sort()函数判断一个元素是否比另一个
+元素小。如果不是,则交换这两个元素的位置。换句话说,您告诉了 list 如何解释小于,就这里而言,
+小于的含义是第一个参数大于第二个参数。这个谓词仅在第一个值比第二个值大时返回 true。也就是
+说,使用该谓词时,仅当第一个元素(lsh)的数字值比第二个元素(rsh)大时,sort()才认为第一个元
+素比第二个元素小。基于这种解释,sort()交换元素的位置,以满足谓词指定的标准。
+
+对包含对象的 list 进行排序以及删除其中的元素
+	• 在 list 包含的对象所属的类中,实现运算符<;
+	• 提供一个排序二元谓词—一个这样的函数,即接受两个输入值,并返回一个布尔值,指出第一个值是否比第二个值小。
+
+函数 sort()检查 ContactItem 是否定义了运算符<,发现第 36~39 行定义了该运算
+符。ContactItem::operator<让 list::sort()按姓名的字母顺序排列元素(而不是根据电话号码或随机逻辑进
+行排序)
+
+list::remove( )将一个名人的联系信息从 list 中删除。您将参数设置成了包含该
+名人姓名的 ContactItem 对象,list::remove( )使用第 30~33 行实现的 ContactItem::operator==将该对象
+与 list 中的元素进行比较。该运算符在姓名相同时返回 true,向 list::remove( )指出了匹配标准
+
+forward_list,而不是双向链表 std::list。 std::forward_list 是一种单向链表,即只允许沿一个方向遍历
+要使用 std::forward_list,需要包含头文件<forward_list>:
+#include<forward_list>
+
+如果不想根据默认标准进行删除或排序,别忘了给 sort( )和 remove( )提供一个谓词函数。
+
+
+问:list 为何提供诸如 sort()和 remove()等成员函数?
+答:STL list 类需要确保指向 list 中元素的迭代器始终有效,而不管如何在 list 中移动该元素。虽然 STL 算法也可用于 list,但 list 的成员函数可确保 list 的上述特征,即将 list 排序后,指向 list 中元素的迭代器仍指向原来的元素。
+
+问:使用存储 CAnimal 对象的 list 时,为了让 list 的成员函数能够正确处理 CAnimal 对象,应为CAnimal 类实现哪些运算符?
+答:对于其对象将存储在 STL 容器中的类,必须为它实现默认比较运算符==和运算符<。
+
+问:对于下述代码行,该如何将关键字 auto 替换为显式类型?
+list<int> linkInts(10); // list of 10 integers
+auto firstElement = linkInts.begin();
+答: 如果您使用的是不遵循 C++11 的老式编译器,应将关键字 auto 替换为显式类型声明,如下所示:
+list<int> linkInts(10); // list of 10 integers
+list<int>::iterator firstElement = linkInts.begin();
+
+
+
+
+
+
+

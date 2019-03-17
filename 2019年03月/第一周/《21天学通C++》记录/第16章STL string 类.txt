@@ -1,0 +1,90 @@
+C++支持动态分配内存,因此可以如下定义更动态的字符数组:
+char* dynamicName = new char [arrayLen];
+
+这定义了一个动态分配的字符数组,其长度由变量 arrayLen 的值指定,而这种值是在运行阶段确
+定的,因此该数组的长度是可变的。然而,如果要在运行阶段改变数组的长度,必须首先释放以前分
+配给它的内存,再重新分配内存来存储数据。
+
+如果将 char*用作类的成员属性,情况将更复杂。将对象赋给另一个对象时,如果编写正确的复制
+构造函数和赋值运算符,两个对象将包含同一个指针的拷贝,该指针指向相同的缓冲区。其结果是,
+两个对象的字符串指针存储的地址相同,指向同一个内存单元。其中一个对象被销毁时,另一个对象
+中的指针将非法,让应用程序面临崩溃的危险
+
+std::string 和 std::wstring 实际上是同一个模板类(std::basic_string<T>)的具体化,即分别针对类型 char 和 wchar 的具体化。
+
+实例化和复制 STL string:
+	const char* constCStyleString = "Hello String!";
+	std::string strFromConst (constCStyleString);
+	或:
+	std::string strFromConst = constCStyleString;
+
+	同样,可使用一个 string 对象来初始化另一个:
+	std::string str2Copy (str2);
+
+	// Initialize a string to the first 5 characters of another
+	std::string strPartialCopy (constCStyleString, 5);
+
+	// Initialize a string object to contain 10 'a's
+	std::string strRepeatChars (10, 'a');
+
+访问 std::string 的字符内容
+两种访问 STL string 字符元素的方式:运算符[]和迭代器
+	stlString [charCounter](因此,确保不超出 string 的边界很重要,即读取字符时,提供的偏移量不能大于 string 的长度)
+
+	auto charLocator = stlString.cbegin();
+	charLocator != stlString.cend ();
+	++ charLocator
+
+拼接字符串
+可使用运算符+=,也可使用成员函数 append()
+	string sampleStr2 (" String! ");
+	sampleStr1 += sampleStr2; // use std::string::operator+=
+	// alternatively use std::string::append()
+	sampleStr1.append (sampleStr2);
+
+在 string 中查找字符或子字符串
+成员函数 find()
+	// Find substring "day" - find() returns position
+	size_t charPos = sampleStr.find ("day", 0);
+find_first_of( )、find_first_not_of( )、
+find_last_of( )和 find_last_not_of( ),这些函数可帮助程序员处理字符串
+
+截短 STL string
+	•在给定偏移位置和字符数时删除指定数目的字符。
+	string sampleStr ("Hello String! Wake up to a beautiful day!");
+	sampleStr.erase (13, 28); // Hello String!
+	•在给定指向字符的迭代器时删除该字符。
+	sampleStr.erase (iCharS); // iterator points to a specific character
+	•在给定由两个迭代器指定的范围时删除该范围内的字符。
+	sampleStr.erase (sampleStr.begin (), sampleStr.end ());
+
+冗长的迭代器声明,C++11 可帮助简化:
+	auto iCharS = find (sampleStr.begin(),
+	sampleStr.end (), 'S');
+	编译器将根据 std::find()的返回类型自动推断变量 iCharS 的类型
+
+字符串反转
+	string sampleStr ("Hello String! We will reverse you!");
+	reverse (sampleStr.begin (), sampleStr.end ());
+
+字符串的大小写转换
+	transform(inStr.begin(), inStr.end(), inStr.begin(), ::toupper);
+	transform(inStr.begin(), inStr.end(), inStr.begin(), ::tolower);
+
+如果编写的应用程序需要更好地支持非拉丁字符,如中文和日文,应使用 std::wstring
+
+C++14 在 std::string 中新增的 operator “”s
+	string str1("Traditional string \0 initialization");
+	cout << "Str1: " << str1 << " Length: " << str1.length() << endl;
+
+
+	string str2("C++14 \0 initialization using literals"s);
+	cout << "Str2: " << str2 << " Length: " << str2.length() << endl;
+
+	std::chrono::seconds timeInSec(100s); // 100 seconds
+	std::string timeinText = "100"s;
+
+
+问:我要使用 std::reverse()来反转一个字符串,要使用这个函数,需要包含哪个头文件?
+答:要使用 std::reverse(),需要包含头文件<algorithm>
+

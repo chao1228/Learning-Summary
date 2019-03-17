@@ -1,0 +1,45 @@
+要使用 STL map 或 multimap 类,需要包含头文件<map>:
+#include<map>
+
+实例化 std::map 和 std::multimap
+	map <keyType, valueType, Predicate=std::less <keyType>> mapObj;
+	第三个模板参数是可选的。如果您值指定了键和值的类型,而省略了第三个模板参数,std::map和 std::multimap 将把 std::less<>用作排序标准
+
+在 STL map 或 multimap 中插入元素
+	std::map<int, std::string> mapIntToStr1;
+	// insert pair of key and value using make_pair function
+	mapIntToStr.insert (make_pair (-1, "Minus One"));
+
+	鉴于这两种容器包含的元素都是键-值对,因此也可直接使用 std::pair 来指定要插入的键和值:
+	mapIntToStr.insert (pair <int, string>(1000, "One Thousand"));
+
+	还可使用 map 来实例化 multimap:
+	std::multimap<int, std::string> mmapIntToStr(mapIntToStr.cbegin(),mapIntToStr.cend());
+
+
+typedef map <int, string> MAP_INT_STRING;
+给模板类 map 和 multimap 的实例指定了别名,这样可让代码看起来更简单
+
+
+
+在 STL map 或 multimap 中查找元素
+	multimap <int, string>::const_iterator pairFound = mapIntToStr.find(key);
+	if (pairFound != mapIntToStr.end())
+	{
+	cout << "Key " << pairFound->first << " points to Value: ";
+	cout << pairFound->second << endl;
+	}
+
+在 STL multimap 中查找元素
+	可使用 multimap::count( )确定有多少个值与指定的键对应,再对迭代器递增
+
+删除 STL map 或 multimap 中的元素
+	mapObject.erase (key);
+
+	函数 erase()的另一种版本接受迭代器作为参数,并删除迭代器指向的元素:
+	mapObject.erase(element);
+	还可使用迭代器指定边界,从而将指定范围内的所有元素都从 map 或 multimap 中删除:
+	mapObject.erase (lowerBound, upperBound);
+
+
+	

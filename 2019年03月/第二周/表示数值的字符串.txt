@@ -1,0 +1,36 @@
+bool isNumber(const char* str)
+{
+	bool isNumber = false;
+	if(str == nullptr)
+		return isNumber;
+	isNumber = isUnsignedInt(str&);
+	if(**str=='.')
+	{
+		++(str);
+		isNumber=isUnsignedInt(str&) || isNumber;
+	}
+	if(**str == 'e' || **str == 'E')
+	{
+		++(str);
+		isNumber=isInteger(str&) && isNumber;
+	}
+	
+	return isNumber && **str == '\0'
+
+}
+
+bool isInteger(const **char str)
+{
+	if(str == '+' || str == '-')
+		++(*str);
+	return isUnsignedInt(str&);
+	
+}
+
+bool isUnsignedInt(const **char str)
+{
+	const *char before= *str;
+	while(*str !=nullptr && **str>='0' && **str<='9')
+		++(*str);
+	return *str>before;
+}

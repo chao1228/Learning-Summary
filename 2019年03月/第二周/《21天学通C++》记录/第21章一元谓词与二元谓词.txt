@@ -1,0 +1,34 @@
+C++程序员常用于 STL 算法的函数对象可分为下列两种类型。
+• 一元函数:接受一个参数的函数,如 f(x)。如果一元函数返回一个布尔值,则该函数称为谓词。
+• 二元函数:接受两个参数的函数,如 f(x, y)。如果二元函数返回一个布尔值,则该函数称为二元谓词。
+
+一元函数：
+	template <typename elementType>
+	void FuncDisplayElement (const elementType& element)
+	{
+		cout << element << ' ';
+	};
+	
+	该函数也可采用另一种表现形式,即其实现包含在类或结构的operator()中:
+	// Struct that can behave as a unary function
+	template <typename elementType>
+	struct DisplayElement
+	{
+		void operator () (const elementType& element) const
+		{
+			cout << element << ' ';
+		}
+	};
+
+
+	for_each (numsInVec.begin (), // Start of range
+	numsInVec.end (), // End of range
+	DisplayElement<int> () ); // Unary function object
+
+	如果不使用结构 struct DisplayElement<T>,而使用 lambda 表达式,可极大地简化代码。为此,删除定义该结构的代码,
+	并使用如下代码替换 main( )函数中使用该结构的 3 行代码(第 21~24 行):
+	// Display elements using lambda expression
+	for_each (numsInVec.begin(), // Start of range
+	numsInVec.end(), // End of range
+	[](int& Element) {cout << element << ' '; });
+	// Lambda expression

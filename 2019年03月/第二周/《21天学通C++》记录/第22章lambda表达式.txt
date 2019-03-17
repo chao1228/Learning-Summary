@@ -1,0 +1,65 @@
+一元函数
+	// struct that behaves as a unary function 
+	template <typename elementType> 
+	struct DisplayElement 
+	{ 
+	 void operator () (const elementType& element) const 
+	 { 
+	 cout << element << ' '; 
+	 } 
+	}; 
+
+	for_each (numsInVec.cbegin (), 
+	 numsInVec.cend (), 
+	 [](const int& element) {cout << element << ' '; } ); 
+
+
+一元谓词
+	一元 operator(Type)对应的 lambda 表达式接受一个参数，其定义如下：
+	[](Type paramName) { // lambda expression code here; } 
+	请注意，如果您愿意，也可按引用传递参数：
+	[](Type& paramName) { // lambda expression code here; } 
+	[](int& num) {return ((num % 2) == 0); }
+
+
+通过捕获列表接受状态变量的 lambda 表达式
+	int divisor = 2; // initial value
+
+	auto element = find_if (begin of a range, 
+	 end of a range, 
+	 [divisor](int dividend){return (dividend % divisor) == 0; } ); 
+ 
+ 
+lambda 表达式的通用语法
+	如果要向编译器明确地指定返回类型，可使用->，如下所示：
+	[stateVar1, stateVar2](Type1 var1, Type2 var2) -> ReturnType 
+	{ return (value or expression ); }
+	如果 lambda 表达式包含多行代码，您必须显式地指定返回类型。
+
+	如果要在 lambda 表达式中修改这些状态变量，可添加关键字 multable：
+	[stateVar1, stateVar2](Type& param) mutable { // lambda code here; } 
+
+二元函数
+	transform (vecMultiplicand.begin (), // range of multiplicands 
+	vecMultiplicand.end (), // end of range 
+	vecMultiplier.begin (), // multiplier values 
+	vecResult.begin (), // range that holds result 
+	[](int a, int b) {return a * b; } ); // lambda 
+
+二元谓词
+	sort(namesInVec.begin(), namesInVec.end(), 
+	[](const string& str1, const string& str2) -> bool // lambda
+
+请牢记，lambda 表达式是实现了 operator( )的匿名类（或结构）。
+请牢记，编写 lambda 表达式时，别忘了使用 const 对参数进行限定
+请牢记，lambda 表达式总是以[]或 [state1, state2,…]打头
+请牢记，除非使用关键字 mutable 进行指定，否则不能修改捕获列表中指定的状态变量。
+请牢记，lambda 表达式的语句块（{}）包含多条语句时，别忘了显式地指定返回类型。
+
+
+问：lambda 表达式的状态参数是如何传递的？按值传递还是按引用传递？
+答：编写下面这样包含捕获列表的 lambda 表达式时：
+[Var1, Var2, ... N](Type& Param1, ... ) { …expression ;} 
+将复制状态参数 Var1 和 Var2，而不是按引用传递它们。如果要按引用传递它们，应使用下面的语法：
+[&Var1, &Var2, ... &N](Type& Param1, ... ) { ...expression ;} 
+在这种情况下，对状态变量所做的修改在 lambda 表达式外部仍将有效，因此请务必小心

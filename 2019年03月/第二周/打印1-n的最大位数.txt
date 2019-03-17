@@ -1,0 +1,95 @@
+void Print1ToMaxOfNDigits_1(int n)
+{
+	if(n<=0)
+		return;
+	char* number= new char[n];
+	for(int i=0;i<number.length;i++)
+	{
+		number[i] = '0';
+	}
+	while(!increaseNumber(number))
+	{
+		printNumber(number);
+	}
+}
+
+bool increaseNumber(char* number)
+{
+	bool isOverFlow = false;
+	int numberLength = strlen(number);
+	int nTakeOver = 0;
+	for(int i=numberLength-1;i>=0;i--)
+	{
+		int nSum = number[i]-'0'+nTakeOver;
+		if(i == numberLength)
+			++sum;
+		if(nSum>=10)
+		{
+			if(i==0)
+				isOverFlow = true;
+			else	
+			{
+				nSum -= 10;
+				nTakeOver = 1;
+				number[i]=nSum+'0';
+			}
+		}
+		else
+		{
+			number[i]=nSum+'0';
+			break;
+		}
+	}
+	return isOverFlow;
+}
+
+void printNumber(char* number)
+{
+	bool isBegin = true;
+	for(int i=0;i<strlen(number);i++)
+	{
+		if(isBegin && number[i]!='0')
+			isBegin=false;
+		if(!isBegin)
+			printf('%c',number[i]);
+	}
+}
+
+
+//递归实现
+
+void Print1ToMaxOfNDigits_2(int n)
+{
+	if(n<=0)
+		return;
+	char* number= new char[n];
+	for(int i=0;i<number.length;i++)
+	{
+		number[i] = '0';
+	}
+	for(int j=0;i<10;j++)
+	{
+		number[0] =(char)i+'0';
+		printToMaxOfNDigitsRecursively(number,n,0);
+	}
+}
+
+void printToMaxOfNDigitsRecursively(char* number,int n,int index)
+{
+	if(index == n-1)
+	{
+		printNumber(number);
+		return;
+	}
+	for(int i=0;i<10;i++)
+	{
+		number[index+1] = (char)i+'0';
+		printToMaxOfNDigitsRecursively(number,n,index+1)
+	
+	
+	}
+
+
+
+
+}

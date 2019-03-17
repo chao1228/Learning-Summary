@@ -1,0 +1,110 @@
+vector 是一个模板类,提供了动态数组的通用功能,具有如下特点:
+•在数组末尾添加元素所需的时间是固定的,即在末尾插入元素的所需时间不随数组大小而异,在末尾删除元素也如此;
+•在数组中间添加或删除元素所需的时间与该元素后面的元素个数成正比;
+
+要使用 std::vector 类,需要包含下面的头文件:
+#include <vector>
+
+实例化 vector
+
+	std::vector<int>::const_iterator elementInVec;
+	如果需要可用于修改值或调用非 const 函数的迭代器,可使用 iterator 代替const_iterator。
+
+	4: // vector of integers
+	5: std::vector<int> integers;
+	6:
+	7: // vector initialized using C++11 list initialization
+	8: std::vector<int> initVector{ 202, 2017, -1 };
+	9:
+	10: // Instantiate a vector with 10 elements (it can still grow)
+	11: std::vector<int> tenElements (10);
+	12:
+	13: // Instantiate a vector with 10 elements, each initialized to 90
+	14: std::vector<int> tenElemInit (10, 90);
+	15:
+	16: // Initialize vector to the contents of another
+	    //但如果其中一个 vector 包含的对象类型为float,代码将不能通过编译
+	17: std::vector<int> copyVector (tenElemInit);
+	18:
+	19: // Vector initialized to 5 elements from another using iterators
+	20: std::vector<int> partialCopy (tenElements.cbegin(),tenElements.cbegin() + 5);
+	21:
+
+
+使用 push_back( )在末尾插入元素
+	integers.push_back (1);
+
+size()方法
+	integers.size()
+
+使用 insert( )在指定位置插入元素
+	// insert an element at the beginning
+	integers.insert (integers.begin (), 25);
+
+	// Insert 2 elements of value 45 at the end
+	integers.insert (integers.end (), 2, 45);
+
+
+	// Another vector containing 2 elements of value 30
+	vector <int> another (2, 30);
+	// Insert two elements from another container in position [1]
+	integers.insert (integers.begin () + 1,
+	another.begin (), another.end ());
+
+使用数组下标访问vector，可能会有越界风险，更好的方式是用at
+
+	integers.at(index);
+	at( )函数在运行阶段检查容器的大小,如果索引超出边界(无论如何都不能这样做),将
+	引发异常。
+
+使用指针语法访问 vector 中的元素
+
+	vector <int>::const_iterator element = integers.cbegin ();
+	count<<*(++element)
+
+删除 vector 中的元素
+	使用 pop_back()删除最后一个元素
+	integers.pop_back ();
+
+
+vector 的大小指的是实际存储的元素数,而 vector 的容量指的是在重新分配内存以存储更多元素前 vector 能够存储的元素数。因此,vector 的大小小于或等于容量。
+integers.size ()
+integers.capacity ()
+
+从输出可知,在容量为 5 的 vector 中插入第 6 个元素时,将容量增大到了 7。 size( )总是指出 vector存储的元素数,当前其值为 6。第 22 行插入了第 7 个元素,这次没有扩大容量,因为已分配的内存足以满足需求。这时大小和容量相等,这表明 vector 的容量已经用完,再次插入元素将导致 vector 重新分配其内部缓冲区,复制现有的元素再插入新值
+
+STL deque 类
+std::deque <int> intDeque;
+
+要使用 std::deque,需要包含头文件<deque>:
+#include<deque>
+
+deque 与 vector 的不同之处在于,它还允许
+您使用 push_front 和 pop_front 在开头插入和删除元素
+
+要清空 vector 和 deque 等 STL 容器,即删除其包含的所有元素,可使用函数 clear()。
+	integers.clear();
+
+
+问:使用成员函数 reserve()的优点是什么?
+答:reserve ()为 vector 的内部缓冲区分配内存空间,这样在插入元素时,vector 就不需要重新分配
+缓冲区并复制现有内容。根据 vector 存储的对象类型,为 vector 预留内存空间可能会改善性能。
+
+
+
+5.能否随机访问 vector 中的元素?如果是,如何访问?
+通过下标运算符([])或函数 at( )。
+6.哪种迭代器可用于随机访问 vector 中的元素?
+随机访问迭代器。
+
+template<typename T>
+void DisplayDeque(deque<T> inDQ)
+{
+for (auto element = inDQ.cbegin();
+element != inDQ.cend();
+++element)
+cout << *element << endl;
+}
+
+
+

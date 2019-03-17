@@ -1,0 +1,41 @@
+/*
+double PowerWithUnsignedExponent(double base, unsigned int exponent)
+{
+    double result = 1.0;
+    
+    for (int i = 1; i <= exponent; ++i)
+        result *= base;
+    return result;
+}
+*/
+
+double Power(double base,int exponent)
+{
+	if(equal(base,0.0)&& exponent<0)
+		throws exception("invalid input");
+	int unsignedExponent = exponent;
+	if(exponent<0)
+		unsignedExponent = -exponent;
+	double result = powerWithInsigned(base,unsignedExponent);
+	if(exponent<0)
+		result = 1/result;
+	return result;
+}
+double powerWithInsigned(double base,unsigned int exponent)
+{
+    if (exponent == 0)
+        return 1;
+    if (exponent == 1)
+		return base;
+	double result = powerWithInsigned(base,exponent>>1);
+	result = result*result;
+	if((exponent & 0x1) == 1)
+		result *= base;
+	return result;
+}
+bool equal(double number1,double number)
+{
+	if((number1 -number2>0.000001) && (number1-number<0.000001))
+		return true;
+	return false;
+}

@@ -1,0 +1,101 @@
+单目运算符:单目运算符只对一个操作数进行操作
+
+前缀递增运算符
+Date& operator ++ () // prefix increment
+{
+	++day;
+	return *this;
+}
+后缀递增运算符
+Date operator ++ (int) // postfix increment
+{
+	Date copy(month, day, year);
+	++day;
+	return copy; // copy of instance before increment returned
+}
+可使用++ object,也可使用 object ++,但应选择前者,这样避免创建一个未被使用的临时拷贝。
+
+转换运算符
+要让 cout 能够显示 Date 对象,只需添加一个返回 const char*的运算符:
+operator const char*()
+{
+// operator implementation that returns a char*
+}
+
+explicit operator int()
+{
+return day + month + year;
+}
+这样便可将 Date 对象当做整数使用:
+
+智能指针类 std::unique_ptr 实现了运算符*和->
+
+strcat
+
+MyString operator+ (const MyString& addThis)
+{
+	MyString newString;
+	if (addThis.buffer != NULL)
+	{
+	newString.buffer = new char[GetLength() + strlen(addThis.buffer) + 1];
+	strcpy(newString.buffer, buffer);
+	strcat(newString.buffer, addThis.buffer);
+	}
+	return newString;
+}
+
+以全局函数或静态成员函数的方式实现的双目运算符的定义如下:
+return_type operator_type (parameter1, parameter2);
+以类成员的方式实现的双目运算符的定义如下:
+return_type operator_type (parameter);
+以类成员的方式实现的双目运算符只接受一个参数,其原因是第二个参数通常是从类属性获得的
+
+
+
+Date holiday(12, 25, 2016);
+Date anotherHoliday(1, 1, 2017);
+anotherHoliday = holiday; // uses copy assignment operator
+如果您没有提供复制赋值运算符,这将调用编译器自动给类添加的默认复制赋值运算符。根据类
+的特征,默认复制赋值运算符可能不可行,具体地说是它不复制类管理的资源,默认复制赋值运算符
+存在的这种问题与第 9 章讨论的默认复制构造函数存在的问题类似。与复制构造函数一样,为确保进
+行深复制
+
+如果您编写的类管理着动态分配的资源(如使用 new 分配的数组),除构造函数和析构
+函数外,请务必实现复制构造函数和复制赋值运算符。
+
+const成员函数
+const成员函数中不能修改任何类成员变量
+cons成员函数中不能调用非const成员函数，因为非const成员函数可以修改成员变量
+
+
+实现下标运算符时,应使用关键字 const,这很重要。在程序清单 12.9 中,将下标运算符([])
+的返回类型声明成了 const char&。即便没有关键字 const,该程序也能通过编译。这里使
+用它旨在禁止使用下面这样的代码:
+MyString sayHello("Hello World");
+sayHello[2] = 'k'; //error: operator[] is const
+通过使用 const,可禁止从外部通过运算符[]直接修改成员 MyString::buffer。除将返回类
+型声明为 const 外,还将该运算符的函数类型设置成为 const,这将禁止它修改类的成员
+属性。
+一般而言,应尽可能使用 const,以免无意间修改数据,并最大限度地保护类的成员属性
+一般实现两个下标运算符,其中一个为 const 函数,另一个为非 const 函数
+
+函数运算符 operator()
+
+
+sayHelloAgain = Hello + World + CPP; // operator+, copy constructor, copy
+创建 sayHello 时,需要执行加法运算符两次
+解决这个问题：使用移动构造函数和移动赋值运算符—如果您提供了它们。
+
+
+不能重载的运算符
+.、 .*、 ::、 ?:和 sizeof
+
+问:我编写的类封装了一个动态整型数组,请问我至少应该实现哪些函数和方法?
+答:编写这样的类时,必须明确定义下述情形下的行为:通过赋值直接复制对象或通过按值传递
+给函数间接复制对象。通常,应实现复制构造函数、复制赋值运算符和析构函数。另外,如果想改善
+这个类在某些情况下的性能,还应实现移动构造函数和移动赋值运算符。要能够像访问数组一样访问
+类实例存储的元素,可重载下标运算符 operator []。
+
+
+
+

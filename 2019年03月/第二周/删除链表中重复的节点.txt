@@ -1,0 +1,38 @@
+void deleteDuplication(ListNode** pHead)
+{
+	if(pHead==nullptr || *pHead==nullptr)
+		return;
+	ListNode pNode = *pHead;
+	ListNode* preNode = nullptr;
+	ListNode* nextNode = nullptr;
+	while(pNode->next != nullptr)
+	{
+		nextNode = pNode->next;
+		bool needDelete = false;
+		if(nextNode!=nullptr && nextNode->value == pNode->value)
+			needDelete = true;
+		if(needDelete)
+		{
+			ListNode* toBeDelete = pNode;
+			while(toBeDelete != nullptr && toBeDelete->value == nextNode->value)
+			{
+				nextNode = toBeDelete->next;
+				delete toBeDelete;
+				toBeDelete = nullptr;
+				toBeDelete = nextNode;
+			}
+			if(preNode == nullptr)
+				*pHead = nextNode;
+			else
+			{
+				preNode->next = nextNode;
+			}
+			pNode = nextNode;
+		}
+		else
+		{
+			preNode = pNode;
+			pNode = pNode->next;
+		}
+	}
+}

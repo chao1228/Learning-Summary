@@ -1,0 +1,24 @@
+void regularExpressionsMatching(char* string,char* pattern)
+{
+	if(string==nullptr || pattern==nullptr)
+		throws exception("invalid input");
+	if(*string == '\0' && *pattern == '\0')
+		return true;
+	if(*string != '\0' && *pattern == '\0')
+		return false;
+	if(*string == *pattern || (*string != '\0' && *pattern == '.'))
+	{
+		return regularExpressionsMatching(string+1,pattern+1);
+	}
+	if(*(pattern+1) == '*')
+	{
+		if(*string == *pattern || (*string != '\0' && *pattern == '.'))
+			return regularExpressionsMatching(string,pattern+2) ||
+					regularExpressionsMatching(string+1,pattern) ||
+					regularExpressionsMatching(string+1,pattern+2);
+		else
+			return regularExpressionsMatching(string,pattern+2);
+	}
+	
+	return fasle;
+}

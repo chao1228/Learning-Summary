@@ -1,0 +1,87 @@
+STL 容器 set、multiset、unordered_set 和 unordered_multiset 的优缺点
+
+set 和 multiset之间的区别在于,后者可存储重复的值,而前者只能存储唯一的值
+
+STL set 和 multiset 的内部结构像二叉树,这意味着将元素插入到 set 或 multiset
+时将对其进行排序,以提高查找速度。这还意味着不像 vector 那样可以使用其他元素替换给定位置的
+元素,位于 set 中特定位置的元素不能替换为值不同的新元素,这是因为 set 将把新元素同内部树中的
+其他元素进行比较,进而将其放在其他位置
+
+要使用 std::set 或 set::multiset 类,需要包含头文件<set>:
+#include <set>
+
+鉴于 set 和 multiset 都是在插入时对元素进行排序的容器,如果您没有指定排序标准,它们将使用
+默认谓词 std::less,确保包含的元素按升序排列。
+
+要创建二元排序谓词,可在类中定义一个 operator( ),让它接受两个参数(其类型与集合存储的数据类型相同)
+,并根据排序标准返回 true。下面是一个这样的排序谓词,它按降序排列元素:
+// used as a template parameter in set / multiset instantiation
+template <typename T>
+struct SortDescending
+{
+	bool operator()(const T& lhs, const T& rhs) const
+	{
+		return (lhs > rhs);
+	}
+};
+
+然后,在实例化 set 或 multiset 时指定该谓词,如下所示:
+// a set and multiset of integers (using sort predicate)
+set <int, SortDescending<int>> setInts;
+multiset <int, SortDescending<int>> msetInts;
+
+
+在 set 或 multiset 中插入元素
+	setInts.insert (-1);
+	msetInts.insert (setInts.begin (), setInts.end ());
+
+msetInts.count(-1)
+mulitset::count( )确定 multiset 包含多少个这样的元素,即其值与通过实参传递给这个函
+数的值相同。
+
+在 STL set 或 multiset 中查找元素
+	auto elementFound = setInts.find (-1);
+	// Check if found...
+	if (elementFound != setInts.end ())
+	cout << "Element " << *elementFound << " found!" << endl;
+	else
+	cout << "Element not found in set!" << endl;
+
+
+erase()函数的另一个版本接受一个迭代器作为参数,并删除该迭代器指向的元素:
+	setObject.erase (element);
+通过使用迭代器指定的边界,可将指定范围内的所有元素都从 set 或 multiset 中删除:
+	setObject.erase (iLowerBound, iUpperBound);
+
+可像程序清单 19.4 那样将一个值传递给 erase(),这将删除所有包含指定值的元素。还可将迭代器(如 find()返回的迭代器)传递给 erase( ),这将删除单
+个元素,如下所示:
+MSETINT::iterator elementFound = msetInts.find
+(numberToErase);
+if (elementFound != msetInts.end ())
+msetInts.erase (elementFound);
+else
+cout << "Element not found!" << endl;
+
+这种有序的二叉树结构使得 set 和 multiset 与顺序容器(如vector)相比有一个缺点:在 vector 中,可以使用新值替换迭代器(如 std::find( )返回的迭代器)指
+向的元素;但 set 根据元素的值对其进行了排序,因此不能使用迭代器覆盖元素的值
+
+程序员和数学家都喜欢探索插入和排序时间固定的方式,一种这样的方式是使用基于散列的实现,即使用散列函数来计算排序索引。
+
+
+对于其对象将存储在 set 或 multiset 等容器中的类,别忘了在其中实现运算符<和==。前者将成为排序谓词,而后者将用于 set::find( )等函数。
+
+在需要频繁插入而很少查找的情形下,不要使用 std::set 或 std::multiset;在这种情形下, std::vector和 std::list 通常更适合。
+
+问:我使用函数 find()在 set 中找到了一个元素,并有一个指向该元素的迭代器。能否使用这个迭代器来修改它指向的元素的值?
+答:不能。有些 STL 实现可能允许用户通过迭代器(如 find()函数返回的迭代器)修改元素的值,
+但不应这样做。应将指向 set 中元素的迭代器视为 const 迭代器,即使 STL 实现没有强制这样做。
+
+
+
+
+
+
+
+
+
+

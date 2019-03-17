@@ -1,0 +1,407 @@
+onDataSetupComplete->completeConnection
+
+    private void completeConnection(ApnContext apnContext) {
+
+        if (DBG) log("completeConnection: successful, notify the world apnContext=" + apnContext);
+
+        if (mIsProvisioning && !TextUtils.isEmpty(mProvisioningUrl)) {
+            if (DBG) {
+                log("completeConnection: MOBILE_PROVISIONING_ACTION url="
+                        + mProvisioningUrl);
+            }
+            Intent newIntent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN,
+                    Intent.CATEGORY_APP_BROWSER);
+            newIntent.setData(Uri.parse(mProvisioningUrl));
+            newIntent.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT |
+                    Intent.FLAG_ACTIVITY_NEW_TASK);
+            try {
+                mPhone.getContext().startActivity(newIntent);
+            } catch (ActivityNotFoundException e) {
+                loge("completeConnection: startActivityAsUser failed" + e);
+            }
+        }
+        mIsProvisioning = false;
+        mProvisioningUrl = null;
+        if (mProvisioningSpinner != null) {
+            sendMessage(obtainMessage(DctConstants.CMD_CLEAR_PROVISIONING_SPINNER,
+                    mProvisioningSpinner));
+        }
+
+        mPhone.notifyDataConnection(apnContext.getReason(), apnContext.getApnType());
+	//Data完成连接后，DcTracker会定时检查TX/RX的更新，如果RX没有更新并且TX超过限定值，就会触发Recovery操作
+        startNetStatPoll(); //开启一个线程，通过方法updateDataActivity读取底层文件
+        startDataStallAlarm(DATA_STALL_NOT_SUSPECTED);//设置一个Alarm，每隔一段时间就判断一下需不需要触发Recovery操作
+    }
+
+
+    private void onDataStallAlarm(int tag) {
+        if (mDataStallAlarmTag != tag) {
+            if (DBG) {
+                log("onDataStallAlarm: ignore, tag=" + tag + " expecting " + mDataStallAlarmTag);
+            }
+            return;
+        }
+	//通过方法updateDataStallInfo读取底层文件，更新变量mSentSinceLastRecv的值
+        updateDataStallInfo();
+
+        int hangWatchdogTrigger = Settings.Global.getInt(mResolver,
+                Settings.Global.PDP_WATCHDOG_TRIGGER_PACKET_COUNT,
+                NUMBER_SENT_PACKETS_OF_HANG);
+
+        boolean suspectedStall = DATA_STALL_NOT_SUSPECTED;
+        /* MODIFIED-BEGIN by zhouchenglin, 2018-09-20,BUG-7029234*/
+	//如果一段时间没有RX数据，且超过watchdog的值，需要Recovery
+        if ((mSentSinceLastRecv >= hangWatchdogTrigger) || isDataLossRecovery) {
+            if (DBG) {
+                log("onDataStallAlarm: tag=" + tag + " do recovery action=" + getRecoveryAction());
+            }
+	    //如果suspectedStall为DATA_STALL_SUSPECTED就会走入特别的逻辑
+            suspectedStall = DATA_STALL_SUSPECTED;
+            //In order to avoid false alarm for stall data,check whether mobile network is really unaccessbile
+            //before doing data service recovery
+	    //aosp代码在这里直接进行Recovery
+            //sendMessage(obtainMessage(DctConstants.EVENT_DO_RECOVERY));
+            if(DBG)log("try to initiate data recovery");
+	    //检查国家iso，如果是中国，启动pingThread类，检查一些条件，进行Recovery
+            checkNetworkConnectivity();
+            /* MODIFIED-END by zhouchenglin,BUG-7029234*/
+        } else {
+            if (VDBG_STALL) {
+                log("onDataStallAlarm: tag=" + tag + " Sent " + String.valueOf(mSentSinceLastRecv) +
+                    " pkts since last received, < watchdogTrigger=" + hangWatchdogTrigger);
+            }
+        }
+	//启动一个Alarm，过段时间在执行本方法，进行检查是否进行Recovery
+        startDataStallAlarm(suspectedStall);
+    }
+
+
+
+    /* MODIFIED-BEGIN by zhouchenglin, 2018-09-20,BUG-7029234*/
+    //Data service is unavailable even though data icon displays
+    private class pingThread extends Thread {
+        private ConnectivityManager mConmgr;
+        private int mType;
+
+        private Phone mPh;
+
+        public pingThread(ConnectivityManager cm,Phone ph,int type) {
+            super("ping");
+            mConmgr = cm;
+            mPh = ph;
+
+            mType = type;
+        }
+
+        public void run() {
+            boolean isNetworkAccessible = false;
+            try{
+
+               SocketAddress socAddress = null;
+               Socket clientSocket = new Socket();
+		//国内能否连上www.baidu.com,国外能否连上www.google.com,来判断能否上网
+               if(mType == 1){
+                  socAddress = new InetSocketAddress("www.baidu.com", 80);
+               }else{
+                  socAddress = new InetSocketAddress("www.google.com", 80);
+               }
+
+               clientSocket.connect(socAddress, 5000);
+               if(clientSocket.isConnected()){
+                   if(DBG)log("socket connection is successful");
+                   isNetworkAccessible = true;
+               }
+               clientSocket.close();
+               }catch(IOException e){
+                   if(DBG) log("socket connection fails!");
+               }
+
+              //Start data service recovery procedure
+              if(isNetworkAccessible == false){
+
+                  boolean shouldRecovery = true;
+
+                 //check network status
+                 int networkType = TelephonyManager.getDefault().getDataNetworkType(SubscriptionManager.getDefaultDataSubscriptionId());
+                 if(DBG) log("data service network type : " + TelephonyManager.getNetworkTypeName(networkType));
+                 if (  (TelephonyManager.NETWORK_TYPE_GPRS == networkType)
+                     ||(TelephonyManager.NETWORK_TYPE_GSM == networkType))
+                 {
+                    if(DBG)log("Data recovery is not initiated when data radio technology is GSM/GPRS");
+                    return;
+                 }
+		//判断是否是信号量差导致的无法上网,如果是信号差的话就不进行Recovery
+                 SignalStrength signalStrength = mPh.getSignalStrength();
+                 switch(networkType){
+                   case TelephonyManager.NETWORK_TYPE_LTE:
+                   case TelephonyManager.NETWORK_TYPE_LTE_CA:
+                        if(signalStrength != null){
+                            int rsrp = signalStrength.getLteRsrp();
+                            int rsrq = signalStrength.getLteRsrq();
+                            if(DBG)log("rsrq : " + rsrq + " Dbm : " + signalStrength.getLteDbm() + " rsrp : " + rsrp/*+ " snr : " + signalStrength.getRssnr() + " lte level : " + signalStrength.getSignalStrength().getLteLevel()*/);
+                            if((rsrp < -115) || (rsrq < -11)){
+                                shouldRecovery = false;
+                            }
+                        }
+                        break;
+
+                   /* MODIFIED-BEGIN by yongzhen.wang, 2017-07-24,BUG-5070072*/
+                   //case TelephonyManager.NETWORK_TYPE_GPRS:
+                   //case TelephonyManager.NETWORK_TYPE_GSM:
+                   /* MODIFIED-END by yongzhen.wang,BUG-5070072*/
+                   case TelephonyManager.NETWORK_TYPE_EDGE:
+                        if(signalStrength != null){
+                            int dBm = Integer.MAX_VALUE;
+                            int level =  signalStrength.getGsmSignalStrength();
+                            int asu = (level == 99 ? Integer.MAX_VALUE : level);
+                            if (asu != Integer.MAX_VALUE) {
+                               dBm = -113 + (2 * asu);
+                            } else {
+                               dBm = Integer.MAX_VALUE;
+                            }
+                            if(DBG)log("Gsm dBm : " + dBm);
+                            if(dBm < -100){
+                               shouldRecovery = false;
+                            }
+                        }
+                        break;
+
+                   case TelephonyManager.NETWORK_TYPE_UMTS:
+                   case TelephonyManager.NETWORK_TYPE_DC_HSPAP:
+                   case TelephonyManager.NETWORK_TYPE_HSDPA:
+                   case TelephonyManager.NETWORK_TYPE_HSPAP:
+                   case TelephonyManager.NETWORK_TYPE_HSUPA:
+                        if(signalStrength != null){
+                           int rscp = signalStrength.getWcdmaDbm();
+                           int ecio = signalStrength.getWcdmaRscp()/10;
+                           if(DBG)log("wcdma dBm : " + rscp + " wcdma ecio" + ecio);
+                           if((rscp < -100) || (ecio < -10)){
+                              shouldRecovery = false;
+                           }
+                        }
+                        break;
+                  case TelephonyManager.NETWORK_TYPE_TD_SCDMA:
+                        if(signalStrength != null){
+                            int rscp = signalStrength.getTdScdmaDbm();
+                            if(DBG)log("Tds dBm : " + rscp);
+                            if(rscp < -100){
+                                shouldRecovery = false;
+                            }
+                        }
+                    break;
+
+                  default:
+                    if(DBG) log("3gpp2 or unknown");
+                    break;
+                 }
+
+                  if(DBG) log("shouldRecovery: " + shouldRecovery);
+                  /* MODIFIED-BEGIN by yongzhen.wang, 2017-04-24,BUG-4355231*/
+                  if(shouldRecovery){
+                  int action = getRecoveryAction();
+                  isDataLossRecovery = true;
+                      /* MODIFIED-END by yongzhen.wang,BUG-4881840*/
+
+                  if(mType == 0){
+                    /*if(action == RecoveryAction.GET_DATA_CALL_LIST){
+                       putRecoveryAction(RecoveryAction.CLEANUP);
+                    }*/
+                    if(DBG)log("connectivity test(non-cn) fails, Do recovery");
+                  }else if(mType == 1){
+                    /*if(  (action == RecoveryAction.GET_DATA_CALL_LIST)
+                       ||(action == RecoveryAction.CLEANUP)){
+                       putRecoveryAction(RecoveryAction.REREGISTER);
+                    }*/
+
+
+                        if(DBG)log("connectivity test(cn) fails, Do recovery");
+                      }
+                      sendMessage(obtainMessage(DctConstants.EVENT_DO_RECOVERY));
+
+                  }
+               }else{
+                  isDataLossRecovery = false;
+               }
+          }
+    }
+
+   private void doRecovery() {
+        /* MODIFIED-BEGIN by zhouchenglin, 2018-09-20,BUG-7029234*/
+        if(mPreferredApn != null && ("inkco.claro.com.co").equalsIgnoreCase(mPreferredApn.apn))
+        {
+          if(DBG) log("Don't initiate data recovery if current PDP is set up with the apn : " + mPreferredApn.apn);
+          return;
+        }
+        /* MODIFIED-END by zhouchenglin,BUG-7029234*/
+        if (getOverallState() == DctConstants.State.CONNECTED) {
+            // Go through a series of recovery steps, each action transitions to the next action
+            final int recoveryAction = getRecoveryAction();
+            TelephonyMetrics.getInstance().writeDataStallEvent(mPhone.getPhoneId(), recoveryAction);
+            broadcastDataStallDetected(recoveryAction);
+
+            switch (recoveryAction) {
+                case RecoveryAction.GET_DATA_CALL_LIST:
+                    EventLog.writeEvent(EventLogTags.DATA_STALL_RECOVERY_GET_DATA_CALL_LIST,
+                            mSentSinceLastRecv);
+                    if (DBG) log("doRecovery() get data call list");
+                    mDataServiceManager.getDataCallList(obtainMessage());
+                    putRecoveryAction(RecoveryAction.CLEANUP);
+                    break;
+                case RecoveryAction.CLEANUP:
+                    EventLog.writeEvent(EventLogTags.DATA_STALL_RECOVERY_CLEANUP,
+                            mSentSinceLastRecv);
+                    if (DBG) log("doRecovery() cleanup all connections");
+                    cleanUpAllConnections(Phone.REASON_PDP_RESET);
+                    putRecoveryAction(RecoveryAction.REREGISTER);
+                    break;
+                case RecoveryAction.REREGISTER:
+                    EventLog.writeEvent(EventLogTags.DATA_STALL_RECOVERY_REREGISTER,
+                            mSentSinceLastRecv);
+                    if (DBG) log("doRecovery() re-register");
+                    /* MODIFIED-BEGIN by zhouchenglin, 2018-09-20,BUG-7029234*/
+	            //细节问题
+                    //mPhone.getServiceStateTracker().reRegisterNetwork(null);
+                    onDataAttachDetachReq(DATA_DETACH_ACTION);
+                    putRecoveryAction(RecoveryAction.RADIO_RESTART);
+                    break;
+                case RecoveryAction.RADIO_RESTART:
+                    EventLog.writeEvent(EventLogTags.DATA_STALL_RECOVERY_RADIO_RESTART,
+                            mSentSinceLastRecv);
+                    if (DBG) log("restarting radio");
+                    isDataLossRecovery = false;
+                    /* MODIFIED-END by zhouchenglin,BUG-7029234*/
+                    restartRadio();
+                    putRecoveryAction(RecoveryAction.GET_DATA_CALL_LIST);
+                    break;
+                default:
+                    throw new RuntimeException("doRecovery: Invalid recoveryAction="
+                            + recoveryAction);
+            }
+            mSentSinceLastRecv = 0;
+        }
+    }
+doRecovery方法中有4种不同的Recovery action对应着各自的处理：
+
+1. 向Modem主动查询DATA CALL LIST
+
+2. 清除现有的数据链接
+
+3. 重新驻网
+
+4. 重启Radio
+
+onDataSetupComplete->onDataSetupCompleteError->startAlarmForReconnect
+
+
+网络状态改变便发送ConnectivityManager.CONNECTIVITY_ACTION广播
+            }else if(action.equals(ConnectivityManager.CONNECTIVITY_ACTION)){
+               int closeDataRecovery = Settings.System.getInt(mPhone.getContext().getContentResolver(), "close_data_recovery", 0);
+               boolean isRoaming = TelephonyManager.getDefault().isNetworkRoaming(SubscriptionManager.getDefaultDataSubscriptionId());
+               // MODIFIED-BEGIN by Xijun.Zhang, 2018-09-25,Task-7034745
+               boolean isVzwCard = TelephonyManager.getDefault().isVZWCard(mPhone.getSubId());
+               if(DBG) log("DcTracker, action : " + action  + ", wifi data recovery state : " + closeDataRecovery);
+               if(closeDataRecovery == 0 && !isRoaming && (mBatteryLevel > 15) && (SystemProperties.getInt(PROPERTY_ECID, -1) != CARRIER_ID_VERIZON && !isVzwCard && SystemProperties.getInt(PROPERTY_ECID, -1) != 539 && SystemProperties.getInt(PROPERTY_ECID, -1) != 50)){
+               // MODIFIED-END by Xijun.Zhang, 2018-09-25,Task-7034745
+                   NetworkInfo ni = (NetworkInfo) intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
+                   if (ni != null){
+                      if(ni.isConnected()){
+                         if(ni.getType() == ConnectivityManager.TYPE_WIFI){
+                            if(DBG)log("wifi connected");
+			    //如果网络ok，停止Recovery的Alarm
+                            onStopDataLossAlarm();
+                            putDataLossRecoveryAction(DataLossRecoveryAction.ACTION_NONE);
+                         }else if(ni.getType() == ConnectivityManager.TYPE_MOBILE){
+                            if(DBG)log("mobile connected");
+                         }
+                      }else{
+                        if(ni.getType() == ConnectivityManager.TYPE_WIFI){
+                            if(DBG)log("wifi disconnected");
+                            boolean isDataEnabled = TelephonyManager.getDefault().getDataEnabled();
+                            if(mPhone.getServiceState().getDataRoaming() == true) {
+                                  isDataEnabled = isDataEnabled && getDataRoamingEnabled();
+                            }
+                            if(DBG)log("user data enabled:" + isDataEnabled);
+                            if(isDataEnabled){
+				//wifi不可用的情况下，开启一个Alarm恢复数据
+                               startDataLossAlarm();
+                            }
+                         }else if(ni.getType() == ConnectivityManager.TYPE_MOBILE){
+                            log("mobile disconnected");
+                         }
+                      }
+                   }
+               }
+
+
+
+最终调用到  onDataLossAlarm -> onDataLossRecovery
+
+
+
+    protected void onDataLossRecovery() {
+         boolean isDataRegistered = mPhone.getServiceState().getDataRegState() == ServiceState.STATE_IN_SERVICE;
+         if(isDataRegistered){
+            if(DBG) log("data service is registered");
+            putDataLossRecoveryAction(DataLossRecoveryAction.ACTION_NONE);
+            int dataConnectedState = TelephonyManager.getDefault().getDataState();
+            if(dataConnectedState != TelephonyManager.DATA_CONNECTED){
+               if(DBG)log("data service is not connected ");
+               onDataAttachDetachReq(DATA_DETACH_ACTION);
+               onStopDataLossAlarm();
+            }else{
+		//在已经注网，且网络已连接，去启动pingThread判断是否要Recovery
+               if(DBG)log("data service is connected ");
+               /*check whether Stall data link appears,if so,try to restore it via PDP RESET*/
+               int ddsSub= SubscriptionManager.getDefaultDataSubscriptionId();
+
+               String iso = TelephonyManager.getDefault().getSimCountryIso(ddsSub);
+               boolean flag = mPhone.getContext().getResources().getBoolean(com.android.internal.R.bool.def_tctfw_data_recovery_mechanism_off);
+               if(DBG) log("Data stall, default data sub : " + ddsSub + ",iso : " + iso);
+               if(!TextUtils.isEmpty(iso)){
+                  if(iso.equalsIgnoreCase("cn")){
+                     new pingThread(mCm,mPhone,1).start();
+                  }else{
+                     new pingThread(mCm,mPhone,0).start();
+
+                  }
+               }else{
+                 if(DBG) log("iso is empty, do nothing!");
+               }
+               onStopDataLossAlarm();
+            }
+         }else{
+            if(DBG)log("data service is not registered");
+            ServiceState ss = TelephonyManager.getDefault().getServiceStateForSubscriber(mPhone.getSubId());
+            boolean isSimCardAvail = TelephonyManager.getDefault().hasIccCard();
+            //if no Sim card or voice service is not ready, do nothing
+            if(!isSimCardAvail || ((ss != null) && (ss.getVoiceRegState() != ServiceState.STATE_IN_SERVICE))){
+               putDataLossRecoveryAction(DataLossRecoveryAction.ACTION_NONE);
+               onStopDataLossAlarm();
+               return;
+           }
+
+           final int recoveryAction = getDataLossRecoverAction();
+           switch(recoveryAction){
+                case DataLossRecoveryAction.REREGISTER:
+                    mPhone.getServiceStateTracker().reRegisterNetwork(null);
+                    if (DBG) log("data is not registered, try to initiate it via reRegister");
+                    putDataLossRecoveryAction(DataLossRecoveryAction.RADIO_RESTART);
+                    break;
+                case DataLossRecoveryAction.RADIO_RESTART:
+                    if (DBG) log("data is not registered, try to initiate it via restarting radio");
+                    putDataLossRecoveryAction(DataLossRecoveryAction.ACTION_NONE);
+                    restartRadio();
+
+                    //stop to try to restoration after restart radio
+                    onStopDataLossAlarm();
+                    break;
+                default:
+                    break;
+            }
+        }
+     }
+
+
+
+
+
