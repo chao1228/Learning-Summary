@@ -1,0 +1,45 @@
+//输入一个二叉树，输出它的镜像
+//递归
+void MirroOfBinaryTree(BinaryTreeeNode *pHead)
+{
+	if(pHead == nullptr)
+		return;
+
+	if(pHead->left != nullptr || pHead->right != nullptr)
+	{
+		BinaryTreeeNode* temBinaryNode = pHead->left;
+		pHead->left = pHead->right;
+		pHead->right = pHead->left;
+	
+	}
+	MirroOfBinaryTree(pHead->left);
+
+	MirroOfBinaryTree(pHead->right);
+}
+
+//循环
+void MirroOfBinaryTree(BinaryTreeeNode *pHead)
+{
+	if(pHead == nullptr)
+		return;
+	stack<BinaryTreeeNode*> treeStack;
+	treeStack.push(pHead);
+
+	
+	while(treeStack.size()>0)
+	{
+		BinaryTreeeNode* pNode = treeStack.top();
+		treeStack.pop();
+		if(pNode->left != nullptr || pNode->right != nullptr)
+		{
+			BinaryTreeeNode* temBinaryNode = pNode->left;
+			pNode->left = pNode->right;
+			pNode->right = pNode->left;
+		}
+		if(pNode->left)
+			treeStack.push(Node->left);
+		if(pNode->right)
+			treeStack.push(Node->right);
+	}
+
+}

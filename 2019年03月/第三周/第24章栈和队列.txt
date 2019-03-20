@@ -1,0 +1,25 @@
+栈:后进先出
+#include <stack> 
+	push() 
+	top()
+	pop()
+	empty()
+	size()
+	
+队列:先进先出
+#include <queue>
+	push()
+	pop()
+	front()
+	back()
+	empty()
+	size()
+
+priority_queue
+priority_queue 与 queue
+的不同之处在于，包含最大值（或二元谓词认为是最大值）的元素位于队首，且只能在队首执行操作
+	push()
+	pop()
+	empty()
+	size()
+	top()

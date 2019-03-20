@@ -1,0 +1,20 @@
+bool isSymmetrical(BinaryTreeNode* pHead)
+{
+	if(pHead == null)
+		return false;
+	return isSymmetricalCore(pHead->left,pHead->right);
+}
+ 
+bool isSymmetricalCore(BinaryTreeNode* node1,BinaryTreeNode* node2)
+{
+	if(node1 == nullptr && node2 == nullptr)
+		return true;
+	if(node1 == nullptr || node2 == nullptr)
+		return false;
+	if(node1->value != node2->value)
+		return false;
+	return isSymmetricalCore(node1->left,node2->right) &&
+			isSymmetricalCore(node1->right,node2->left);
+}
+
+
