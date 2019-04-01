@@ -1,0 +1,25 @@
+void FindPath(BinaryTreeNode* pRoot,int expectNum)
+{
+	if(pRoot == nullptr)
+		return;
+	vector<int> path;
+	int currentSum = 0;
+	FindPath(pRoot,expectNum,path,currentSum);
+
+}
+void FindPath(BinaryTreeNode* pRoot,int expectNum,vector<int> path,int currentSum)
+{
+	currentSum +=  pRoot->value;
+	path.push_back(pRoot->value);
+	if(pRoot->left == nullptr && pRoot->right == nullptr && currentSum = expectNum)
+	{
+		vector<int>::iterator ite = path.begin()
+		for(:ite!=path.end();ite++)
+			print("%d\t",*ite)
+	}
+	if(pRoot->right != nullptr)
+		FindPath(pRoot->right,expectNum,path,currentSum);
+	if(pRoot->left != nullptr)
+		FindPath(pRoot->left,expectNum,path,currentSum);
+	path.pop_back();
+}

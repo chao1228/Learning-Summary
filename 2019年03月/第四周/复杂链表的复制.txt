@@ -1,0 +1,41 @@
+LinkNode* CopyLinkNode(ListNode* pHead)
+{
+    extendLinkList(ListNode* pHead);
+    connectedSiblingNode(ListNode* pHead);
+    return disconnectedLinkList(ListNode* pHead);
+}
+void extendLinkList(ListNode* pHead)
+{
+    ListNode* pNode = pHead;
+    while(pNode->next !=nullptr)
+    {
+        ListNode* cloneNode = new ListNode();
+        cloneNode->value = pNode->value;
+        cloneNode->next = pNode->next;
+        pNode->next = cloneNode;
+        pNode = cloneNode->next;
+    }
+}
+void connectedSiblingNode(ListNode* pHead)
+{
+    ListNode* pNode = pHead->next;
+    while(pNode->next->next !=nullptr)
+    {
+        if(pNode->sibli != nullptr)
+            pNode->sibli = pNode->next->sibli->next;
+        pNode = pNode->next;
+    }
+}
+LinkNode* disconnectedLinkList(ListNode* pHead)
+{
+    ListNode* pNode = pHead;
+    ListNode* cloneHead = pHead->next;
+    ListNode* cloneNode = cloneHead;
+    while(pNode->next->next !=nullptr)
+    {
+        pNode->next = pNode->next->next;
+        cloneNode->next = cloneNode->next->next;
+        pNode = pNode->next->next;
+        cloneNode = cloneNode->next->next;
+    }
+}

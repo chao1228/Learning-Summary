@@ -1,0 +1,47 @@
+void PrintMatrixInCircle(int* num,int rows,int cols)
+{
+	if(num == nullptr || rows <=0 || cols <=0)
+		return;
+	int start = 0;
+	while(columns>2*start && rows>2*start)
+	{
+		PrintMatrixInCircleCore(num&,rows,cols,start)
+		start++;
+	}
+}
+void PrintMatrixInCircleCore(int* num,int rows,int cols,int start)
+{
+	int endX = columns-1-start;
+	int endY = rows-1-start;
+	//从左向右
+	for(int i=start;i<=end;i++)
+	{
+		cout<<(num[start*cols+i])<<endl;
+	}
+	//从上向下
+	if(start<endY)
+	{
+		for(int i=start+1;i<=end;i++)
+		{
+			cout<<(num[i*cols+endX])<<endl;
+		}
+	}
+	//从下向左
+	if(start<endX && start<endY)
+	{
+		for(int i=end;i>=start;i--)
+		{
+			cout<<(num[endY*cols+I])<<endl;
+		}
+	}
+	//从下向上
+	if(start<endX && start<endY-1)
+	{
+		for(int i=start+1;i<=end;i++)
+		{
+			cout<<(num[i*cols+end])<<endl;
+		}
+	}
+
+
+}

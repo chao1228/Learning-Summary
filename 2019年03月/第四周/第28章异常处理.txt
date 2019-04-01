@@ -1,0 +1,25 @@
+使用 try 和 catch 捕获异常
+	catch (std::bad_alloc& exp) 
+	一般而言，可根据可能出现的异常添加多个 catch( )块，这将很有帮助
+
+使用 throw 引发特定类型的异常
+	throw "Dividing by 0 is a crime"; 
+
+	下述重要异常类都是从 std::exception 派生而来的。
+• bad_alloc：使用 new 请求内存失败时引发。
+• bad_cast：试图使用 dynamic_cast 转换错误类型（没有继承关系的类型）时引发。
+• ios_base::failure：由 iostream 库中的函数和方法引发。
+
+不要在析构函数中引发异常。
+
+不要认为内存分配总能成功，务必将使用 new的代码放在 try 块中，并使用 catch(std::exception&)捕获可能发生的异常。
+
+不要在catch( )块中包含实现逻辑或分配资源的代码，以免在处理异常的同时导致异常。
+
+问：为何自定义异常类应继承 std::exception？
+答：当然，并非必须这样做，但这让您能够重用捕获 std::exception 异常的所有 catch( )块。编写自
+己的异常类时，可以不继承任何类，但必须在所有相关的地方插入新的 catch(MyNewExceptionType&)
+语句。
+
+问：构造函数可引发异常吗？
+答：构造函数实际上没有选择余地！它们没有返回值，指出问题的唯一途径是引发异常。

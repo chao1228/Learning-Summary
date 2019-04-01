@@ -1,0 +1,89 @@
+//从上到下打印二叉树
+void PrintFromTopToBottom(BinaryTree* pRoot)
+{
+	if(pRoot == null)
+		return;
+	deque<BinaryTree*> dequeTreeNode;
+	dequeTreeNode.push(pRoot);
+	while(!dequeTreeNode.empty())
+	{
+		BinaryTree* pNode = dequeTreeNode.front();
+		dequeTreeNode.pop();
+		count<<pNode->value<<endl;
+		if(pRoot->left != nullptr)
+			dequeTreeNode.push(pRoot->left);
+		if(pRoot->right != nullptr)
+			dequeTreeNode.push(pRoot->right);
+	}
+}
+
+//分行从上到下打印二叉树
+void PrintFromTopToBottom(BinaryTree* pRoot)
+{
+	if(pRoot == null)
+		return;
+	deque<BinaryTree*> dequeTreeNode;
+	dequeTreeNode.push(pRoot);
+	int nextLevel = 0;
+	int toBePrinted = 0;
+	while(!dequeTreeNode.empty())
+	{
+		BinaryTree* pNode = dequeTreeNode.front();
+		if(pRoot->left != nullptr)
+		{
+			dequeTreeNode.push(pRoot->left);
+			nextLevel++;
+		}
+		if(pRoot->right != nullptr)
+		{
+			dequeTreeNode.push(pRoot->right);
+			nextLevel++;
+		}
+		dequeTreeNode.pop();
+		count<<pNode->value<<endl;
+		toBePrinted --;
+		if(toBePrinted == 0)
+		{
+			toBePrinted = nextLevel;
+			nextLevel = 0;
+			count<<endl;
+		}
+	}
+}
+//之字形打印二叉树
+void PrintTreeInZigZag(BinaryTree* pRoot)
+{
+    if(pRoot == nullptr)
+        return;
+    Stack<BinaryTree*> level[2];
+    int current = 0;
+    int next = 1;
+    level[current].push(pRoot);
+
+    while(!level[current].empty || !level[next].empty)
+    {
+        BinaryTree* pNode = level[current].top();
+        level[current].pop();
+        print(pNode->value);
+        if(current%2 == 0)
+        {
+            if(pNode->right != null)
+                level[next].push(pNode->right);
+            if(pNode->left != null)
+                level[next].push(pNode->left);
+        }
+        if(current%2 != 0)
+        {
+            if(pNode->left != null)
+                level[next].push(pNode->left);
+            if(pNode->right != null)
+                level[next].push(pNode->right);
+        }
+        if(level[current].empty)
+        {
+            int temp = current;
+            current = next;
+            next = temp;
+        }
+    }
+}

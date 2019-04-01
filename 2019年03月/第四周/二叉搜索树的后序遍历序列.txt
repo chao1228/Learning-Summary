@@ -1,0 +1,25 @@
+bool veryfySequenceOfBTS(int[] sequence,int start,int end)
+{
+	if(sequence == nullptr || end - start>0)
+		return false;
+	int root = sequence[end];
+	int i=start;
+	for(;i<=end;i++)
+	{
+		if(sequence[i]>root)
+			break;
+	}
+	int j=i;
+	for(;j<=end;j++)
+	{
+		if(sequence[j]<root)
+			return false;
+	}
+	bool left = false;
+	if(i>0)
+		left=veryfySequenceOfBTS(sequence,start,i-1);
+	bool right = false;
+	if(j<end)
+		veryfySequenceOfBTS(sequence,j,end);
+	return left && right;
+}
