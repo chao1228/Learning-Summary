@@ -1,0 +1,48 @@
+void Serialize(BinaryTreeNode* pRoot,ostream& stream)
+{
+	if(pRoot == nullptr)
+	{
+		stream<<"$,";
+		return;
+	}
+	stream<<pRoot->value<<',';
+	Serialize(pRoot->left,stream);
+	Serialize(pRoot->right,stream);
+}
+
+void deserialize(BinaryTreeNode** pRoot,ostream& stream)
+{
+	int number;
+	if(ReadStream(stream,number&))
+	{
+		BinaryTreeNode* pNode = new BinaryTreeNode();
+		pRoot ->left = nullptr;
+		pRoot->rigth = nullptr;
+		pRoot->value = number;
+		deserialize(pRoot->left,stream);
+		deserialize(pRoot->right,stream);
+	}
+}
+void ReadStream(ostream& stream,int* number)
+{
+	if(stream.eof())
+		return false;
+	char buffer[32];
+	buffer[0] = '\0';
+	char ch;
+	stream>>ch;
+	int i = 0;
+	while(!stream.eof() && ch != ',')
+	{
+		buffer[i++] = ch;
+		stream >> ch;
+	}
+	
+	bool isNumber = false;
+	if(i>0 && buffer[0]!='\0')
+	{
+		* number = atoi(buffer[0]);
+		isNumber = true;
+	}
+	return isNumber;
+}
