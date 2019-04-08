@@ -1,0 +1,48 @@
+//大致思想
+bool isPopOrder(const int* push，const int* pop,int length)
+{
+	if(push == nullptr || pop == nullptr || length <= 0)
+		return false;
+	Stack<int> stack;
+	int popIndex;
+	for(int i=0;i<length;i++)
+	{
+		stack = push[i];
+		while(!stack.enpty() && stack.top() == pop[popIndex])
+		{
+			stack.pop();
+			popIndex ++;
+		}
+	}
+	return stack.empty();
+}
+
+//考虑全面
+bool isPopOrder(const int* push，const int* pop,int length)
+{
+	if(push == nullptr || pop == nullptr || length <= 0)
+		return false;
+	Stack<int> stack;
+	const int* pushNext = push;
+	const int* popNext = pop;
+
+	while(popNext-pop < length)
+	{
+		while(stack.empty && stack.top()!= *popNext)
+		{
+			if(pushNext - push == length)
+			{
+				break;
+			}
+			stack.push(*pushNext);
+			++pushNext;
+		}
+		if(stack.top()!= *popNext)
+			break;
+		stack.pop();
+		popNext++;
+	}
+	if(stack.empty() && popNext-pop == length)
+		return true;
+	return false;
+}
