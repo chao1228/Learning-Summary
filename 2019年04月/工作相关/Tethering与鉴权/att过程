@@ -1,0 +1,9 @@
+mSPETetherUsbPassed  //USB热点的鉴权许可
+mSPEMHSPassed        //wifi
+mSPETetherBluetoothPassed //蓝牙
+
+/frameworks/base/services/core/java/com/android/server/connectivity/Tethering.java
+
+tether-》checkPermission
+
+checkPermission 主要判断，如果不是ATT的卡

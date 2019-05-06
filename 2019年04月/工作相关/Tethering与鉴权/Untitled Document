@@ -1,0 +1,19 @@
+WifiController.DefaultState
+processMessage(CMD_SET_AP)->
+
+WifiStateMachinePrime.java
+enterSoftAPMode
+
+startSoftAp
+(Log.d(TAG, "Starting SoftApModeManager");)
+
+mStateMachine.sendMessage(SoftApStateMachine.CMD_START, mApConfig);
+
+SoftApManager.IdleState
+processMessage(CMD_START)->
+
+
+
+startSoftAp
+
+mWifiNative.startSoftAp（调用native方法开启热点）
