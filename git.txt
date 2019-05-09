@@ -1,1 +1,5 @@
 git clone https://github.com/chao1228/Learning-Summary.git
+
+git add .
+git commit -m "2019\05\09"
+git push origin master
